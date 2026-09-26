@@ -191,73 +191,6 @@
       "adapter_kind": 1
     },
     {
-      "key": 3244,
-      "motion": 5110,
-      "flags": 2199447666688,
-      "ki_cost": 10,
-      "recovery_frame": 115,
-      "transition_count": 76,
-      "source_voices": [
-        {
-          "frame": 29,
-          "index": 16,
-          "hash": 2543008070
-        }
-      ],
-      "id": "jin_hayabusa.action_0cac",
-      "adapter_kind": 2,
-      "next": null,
-      "next_start": 0,
-      "next_end": 0,
-      "voices": [],
-      "evidence": "work/jin-stance-holds-research.json",
-      "source_payload_prefix": "02000000000200000000ff02ac0cffff0109000000000a0000004c1900020000f613000073009600ffff000001000200ffffff00ffffffff",
-      "replacement": {
-        "player_key": 3194,
-        "player_motion": 2300,
-        "transition_count": 42,
-        "recovery_frame": 46
-      },
-      "native_followups": [
-        "jin_hayabusa.action_0cad"
-      ]
-    },
-    {
-      "key": 3245,
-      "motion": 5111,
-      "flags": 2199447666688,
-      "ki_cost": 10,
-      "recovery_frame": 65,
-      "transition_count": 75,
-      "source_voices": [
-        {
-          "frame": 16,
-          "index": 10,
-          "hash": 1943050345
-        }
-      ],
-      "id": "jin_hayabusa.action_0cad",
-      "adapter_kind": 4,
-      "next": null,
-      "next_start": 0,
-      "next_end": 0,
-      "voices": [
-        {
-          "frame": 16,
-          "index": 10,
-          "hash": 1943050345
-        }
-      ],
-      "evidence": "work/jin-stance-holds-research.json",
-      "source_payload_prefix": "02000000000200000000ff02ad0cffff0109000000000a0000004c1900020000f713000041006900ffff000001000200ffffff00ffffffff",
-      "replacement": {
-        "player_key": 3194,
-        "player_motion": 2300,
-        "transition_count": 42,
-        "recovery_frame": 46
-      }
-    },
-    {
       "id": "jin_hayabusa.action_0c79",
       "key": 3193,
       "motion": 5014,
@@ -652,16 +585,99 @@
         "transition_count": 42,
         "recovery_frame": 46
       }
+    },
+    {
+      "id": "jin_hayabusa.action_0c75",
+      "key": 3189,
+      "motion": 5010,
+      "flags": 424411136,
+      "ki_cost": 0,
+      "recovery_frame": -1,
+      "transition_count": 74,
+      "adapter_kind": 2,
+      "next": null,
+      "next_start": 0,
+      "next_end": 0,
+      "voices": [],
+      "source_voices": [],
+      "source_payload_prefix": "02000100000200000000ff01750cffff010900000000000000004c190000000092130000ffffffffffff000001000200ffffff00ffffffff000000000000ffff",
+      "evidence": "work/jin-slam-20260926-090206/take-0001/events.jsonl",
+      "replacement": {
+        "player_key": 3194,
+        "player_motion": 2300,
+        "transition_count": 42,
+        "recovery_frame": 46
+      },
+      "native_followups": [
+        "jin_hayabusa.action_0c77"
+      ]
+    },
+    {
+      "id": "jin_hayabusa.action_0c77",
+      "key": 3191,
+      "motion": 5012,
+      "flags": 424411136,
+      "ki_cost": 0,
+      "recovery_frame": -1,
+      "transition_count": 74,
+      "adapter_kind": 4,
+      "next": null,
+      "next_start": 0,
+      "next_end": 0,
+      "voices": [],
+      "source_voices": [],
+      "source_payload_prefix": "02000100000200000000ff01770cffff010900000000000000004c190000000094130000ffffffffffff000001000200ffffff00ffffffff000000000000ffff",
+      "evidence": "work/jin-slam-20260926-090206/take-0001/events.jsonl",
+      "replacement": {
+        "player_key": 3194,
+        "player_motion": 2300,
+        "transition_count": 42,
+        "recovery_frame": 46
+      },
+      "native_followups": [
+        "jin_hayabusa.action_0c78"
+      ]
+    },
+    {
+      "id": "jin_hayabusa.action_0c78",
+      "key": 3192,
+      "motion": 5013,
+      "flags": 424411136,
+      "ki_cost": 20,
+      "recovery_frame": -1,
+      "transition_count": 74,
+      "adapter_kind": 4,
+      "next": null,
+      "next_start": 0,
+      "next_end": 0,
+      "voices": [
+        {
+          "frame": 4,
+          "index": 8,
+          "hash": 465981000
+        }
+      ],
+      "source_voices": [
+        {
+          "frame": 4,
+          "index": 8,
+          "hash": 465981000
+        }
+      ],
+      "source_payload_prefix": "02000000000200000000ff01780cffff010900000000140000004c190000000095130000ffffffffffff000001000200ffffff00ffffffff000000000000ffff",
+      "evidence": "work/jin-slam-20260926-090206/take-0001/events.jsonl",
+      "replacement": {
+        "player_key": 3194,
+        "player_motion": 2300,
+        "transition_count": 42,
+        "recovery_frame": 46
+      }
     }
   ],
   "evidence": "work/jin-heavy-research.json",
   "classification": "D visually confirmed by player: vertical slash then two cyclone spins. Hitbox/effect correction awaits gameplay confirmation. C retained as an alternate.",
   "hold_entry": "jin_hayabusa.action_0c79",
   "hold_chains": {
-    "jin_hayabusa.action_0cac": [
-      "jin_hayabusa.action_0cac",
-      "jin_hayabusa.action_0cad"
-    ],
     "jin_hayabusa.action_0c79": [
       "jin_hayabusa.action_0c79"
     ],
@@ -682,6 +698,11 @@
       "jin_hayabusa.action_0c81",
       "jin_hayabusa.action_0c82",
       "jin_hayabusa.action_0c83"
+    ],
+    "jin_hayabusa.action_0c75": [
+      "jin_hayabusa.action_0c75",
+      "jin_hayabusa.action_0c77",
+      "jin_hayabusa.action_0c78"
     ]
   }
 }
