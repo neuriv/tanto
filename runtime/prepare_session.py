@@ -18,6 +18,7 @@ from load_resources import load_resources
 from trace_reader import Trace
 from action_banks import inspect_bank, inspect_banks, resolve
 from move_imports import read_import_manifest, GRAB_ATTEMPT_FLAGS, PLAYER_PAIRED_FLAGS, STANCE_OPENERS, PLAYER_TEMPLATES, IMPORT_LIMIT, is_izuna_bridge
+from engine_policy import LAUNCH_PROFILES, TRACKING_RATES, AIR_JUGGLE_BOOST
 from engine_config import validate_preset, read_json, atomic_json, HEAVY_STRINGS, NATIVE_SKILLS, HELD_MOVES
 
 IMPORT_MANIFEST = CODE.parent / 'catalogue/imports/okatsu.json'
@@ -147,7 +148,7 @@ def resolve_imports(game, stable, bank, motion_bank, timing_wrapper, manifest):
             by_id = {item['id']: item for item in manifest['moves']}
             for target in move['native_followups']:
                 if target not in by_id or not any(struct.unpack_from('<h', row, 0x14)[0] == by_id[target]['key']
-                        and ((0xC67<=move['key']<=0xC69 and row[10:13]==b'\x02\x0c\x01') or row[11] == 0xff and (row[10] == 1 or struct.unpack_from('<H', row)[0] == 20
+                        and (((move['key']==0xBBF or 0xC63<=move['key']<=0xC65) and row[10:13]==b'\x02\x00\x01') or row[11] == 0xff and (row[10] == 1 or struct.unpack_from('<H', row)[0] == 20
                               or (move['flags'] == PLAYER_PAIRED_FLAGS or move['key'] in (0xC73,0xC82)) and struct.unpack_from('<H', row)[0] == 0
                             or row[10] == 0 and row[:10] == b'\xff'*10)) for row in rows):
                     raise ValueError('Configured native continuation is absent from the source rows')
@@ -398,7 +399,7 @@ def fresh_profile(game):
                 imports=imports, adapters=adapters, string_variant=manifest['string_variant'],
                 hold_variant=hold_variant, hold_milliseconds=hold_milliseconds, hold_camera_bank=hold_camera_bank,
                 hold_stances=hold_stances, frost_variants=frost_variants, frost_milliseconds=frost_milliseconds,
-                frost_speed=configuration['frost_startup_speed'],launch_profiles=configuration['launch_profiles'],air_juggle_boost=configuration['air_juggle_boost'],tracking_rates=configuration['tracking_rates'],
+                frost_speed=configuration['frost_startup_speed'],launch_profiles=LAUNCH_PROFILES,air_juggle_boost=AIR_JUGGLE_BOOST,tracking_rates=TRACKING_RATES,
                 camera=dict(source_bank=hex(camera_bank), player_slot=hex(camera_slot),
                             original=hex(camera_original), source_clip=camera_move['clip']),
                 resource_ownership='engine_retained', source_actor_required=False, native_grapple=native_grapple,
