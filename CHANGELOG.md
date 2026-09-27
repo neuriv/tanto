@@ -1,5 +1,15 @@
 # Release notes
 
+## 0.3.0-alpha.3
+
+- Current Sword Rebuild 1 is the default for new installs; existing settings and the original moveset remain available.
+- Choose held Triangle/Y per stance, with separate launcher-only and launcher-plus-Izuna choices. Heavy replacements no longer swallow held bindings; matching custom chords take priority over competing native attacks. R1/RB remains reserved for Ki Pulse and Frost Moon.
+- Rebind custom buttons, native overrides and Frost Moon independently. Invalid stance combinations explain how to correct them.
+- Includes the confirmed Jin, Oda, Omnislice and Sanada source setup, Hideyori Ki correction, handgun assets and temporary sword hiding.
+- Portable EXE includes its worker, move definitions, artwork and collection. Packaged checks cover saving, rebinding and XInput translation without accessing the game.
+
+Physical Xbox/PS5, broad enemy contact and another-PC checks remain pending.
+
 ## 0.3.0-alpha.2
 
 First portable MWM desktop release candidate. The EXE includes its own Engine worker, reviewed move data, artwork and collection. Each launch extracts separately; versioned worker files survive editor closure so an enabled Engine can retain its runtime. Apply now saves the selected game path before refreshing the form. The release gate checks the copied EXE's startup, configuration and bundled assets with gameplay disabled.

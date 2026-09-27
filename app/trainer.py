@@ -16,8 +16,8 @@ for folder in (CODE,):
     sys.path.insert(0, str(folder))
 
 from catalogue import load_catalogue
-from engine_config import DEFAULT_PRESET, move_capabilities, atomic_json, read_json, validate_preset, binding_for_preset
-from game_controller import BindingCapture, GameController, binding_buttons, game_button_mask
+from engine_config import move_capabilities, atomic_json, read_json, validate_preset, binding_for_preset
+from game_controller import BindingCapture, GameController, binding_buttons, game_button_mask, game_binding
 from controller_reader import ControllerReader
 from trace_reader import Trace
 from process_support import active_runtime, process_matches, worker_command
@@ -239,7 +239,7 @@ class Trainer:
         self.speed_summary.grid(row=3,column=0,columnspan=2,sticky='ew',pady=12)
         scrollbar=ttk.Scrollbar(speed,command=self.speed_summary.yview)
         scrollbar.grid(row=3,column=2,sticky='ns'); self.speed_summary.configure(yscrollcommand=scrollbar.set)
-        ttk.Label(speed,text='1 = original speed. Entire clips retain their start and end. Paired animations keep '
+        ttk.Label(speed,text='Blank = inherited speed; 1 = explicit original speed. Entire clips retain their start and end. Paired animations keep '
             'engine timing; Frost startup remains engine-owned.',wraplength=840).grid(row=4,column=0,columnspan=2,sticky='w')
         controls=ttk.Frame(outer); controls.pack(fill='x',pady=8)
         for title,command in (('Apply',self.apply),('Save moveset…',self.save),('Load moveset…',self.load),('Restore baseline',self.baseline)):
@@ -328,7 +328,7 @@ class Trainer:
             field.set(next(label for label,identifier in choices.items() if identifier==value))
         self.skill_bindings=[dict(binding) for binding in preset['skill_bindings']]
         self.refresh_bindings()
-        for identifier,field in self.speed_fields.items(): field.set(str(preset['move_settings'].get(identifier,{}).get('speed',1)))
+        for identifier,field in self.speed_fields.items(): field.set(str(preset['move_settings'].get(identifier,{}).get('speed','')))
         self.refresh_speeds()
 
     def form(self):
@@ -342,7 +342,7 @@ class Trainer:
             skill_bindings=self.skill_bindings,
             frost_moon={stance:self.frost_choices[field.get()] for stance,field in self.frost_fields.items()},
             stance_holds={stance:self.skill_choices[self.native_fields[stance].get()] for stance in self.capabilities['stances']},
-            move_settings={identifier:dict(speed=float(field.get())) for identifier,field in self.speed_fields.items() if float(field.get())!=1},
+            move_settings={identifier:dict(speed=float(field.get())) for identifier,field in self.speed_fields.items() if field.get().strip()},
             **{field:variable.get() for field,variable in self.native_toggles.items()}))
 
     def refresh_bindings(self):
@@ -406,13 +406,13 @@ class Trainer:
         except (ValueError,KeyError) as error: self.error(error)
 
     def refresh_speeds(self):
-        # Summarize only moves whose playback differs from their original speed.
+        # Summarize explicit speeds, including 1x overrides of inherited string speeds.
         # Temporarily unlock the read-only text widget, replace its contents, then lock it again.
         # Keep the separate numeric editor synchronized with the selected move's form value.
         self.speed_summary.configure(state='normal')
         self.speed_summary.delete('1.0','end')
         self.speed_summary.insert('1.0','\n'.join(f'{label}: {self.speed_fields[identifier].get()}×' for label,identifier in self.speed_choices.items()
-            if float(self.speed_fields[identifier].get())!=1) or 'All moves: original speed (1×)')
+            if self.speed_fields[identifier].get().strip()) or 'All moves: inherited speed')
         self.speed_summary.configure(state='disabled')
         if self.speed_choice.get(): self.select_speed()
 
@@ -490,6 +490,7 @@ class Trainer:
             self.button_choices=binding_buttons(calibration['device'],calibration.get('button_map'))
             for selector in self.button_selectors: selector.configure(values=list(self.button_choices))
             binding = binding_for_preset(self.calibration, preset)
+            game_binding(self.calibration, binding)
             atomic_json(RUNTIME/'controller-calibration.json', self.calibration)
             atomic_json(RUNTIME/'controller-binding.json', preset)
             self.binding, self.preset = binding, preset
@@ -527,12 +528,12 @@ class Trainer:
             except (OSError, ValueError, KeyError) as error: self.error(error)
 
     def baseline(self):
-        # Restore the maintained sword preset into the form.
+        # Restore the original sword preset into the form.
         # Apply it through the normal binding persistence path.
         # Provide one reproducible baseline for gameplay comparisons.
         try:
             baseline=read_json(ROOT/'data/controller-calibration.json')
-            self.load_fields(remap_preset(DEFAULT_PRESET,baseline,self.calibration))
+            self.load_fields(remap_preset(read_json(ROOT/'data/presets/sword-original.json'),baseline,self.calibration))
             self.apply()
         except (OSError,ValueError,KeyError) as error: self.error(error)
 

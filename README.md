@@ -1,19 +1,70 @@
-# MWM  -  Multi-Weapon Moveset Mod
+# MWM — Multi-Weapon Moveset Mod
 
-MWM is the shared application for ten planned Nioh weapon movesets, starting with single katana; Engine owns gameplay integration and Recorder supplies evidence for developer review.
+A portable Nioh moveset editor, starting with single katana. Choose the moves assigned to your inputs, adjust their speed, and save reusable bindings. Ten weapon movesets are planned; the current runtime supports sword.
 
-`desktop/` is the Electron, TypeScript and CSS interface; `app/web_worker.py` connects it to Engine's reviewed configuration and lifecycle APIs. After `npm ci`, use `Trainer.ps1` or `npm start` with the pinned sibling Engine and Python. `Trainer.ps1 -LegacyUI` retains the previous trainer for comparison.
+![MWM moveset editor](docs/mwm-ui.png)
 
-Collection shows the recorded moves, original notes and integration gaps. The Sword Rebuild 1 button loads its supported subset into the form; Apply saves it. Browsing the collection does not enable candidate moves. Product checks live in `tests/` and run through Engine's existing `Test-Offline.ps1`.
+## Start playing
 
-Bindings edits the custom chord and controller mapping; Overrides edits stance and native-action replacements; Tuning shows effective per-phase speeds. Blank speed fields inherit, while explicit `1` forces native playback. Live compilation flags conflicts before Apply, and Save as/Load preserve the complete draft. Recorder's artwork is bundled locally with a darker CSS overlay.
+Download **MWM.exe** from [Releases](https://github.com/tanto-engine/MWM/releases). The EXE contains its own interface, Engine worker, move definitions and artwork; no Python, Node or extra asset downloads are needed. Nioh itself must be installed.
 
-Reuse a binding group saves or loads the custom chord, stance overrides, native overrides or Frost Moon independently. Chord files preserve logical buttons across controller mappings; imports preserve unrelated settings and reject incompatible combinations. `app/binding_groups.py` owns this file contract. The runtime still supports one custom chord, alongside its native override slots.
+Open Nioh, enter a mission with a single katana, then open MWM. New installs start with **Sword Rebuild 1**; existing saved settings stay intact. Choose your assignments and **Save changes**, then **Enable mod**. If you save while enabled, wait for Engine to finish reloading. Use **Disable mod** to return to normal gameplay; closing the editor leaves an enabled mod running. Before enabling a newer EXE, disable the running mod so the new Engine can replace it.
 
-`dataset/` holds 12 sword strings and one handgun candidate under weapon/boss folders, with exact notes, ordered IDs and hashed evidence. `intake.json` tracks every source session; `validate.py` checks records and archived evidence. Hashed original recordings are included in this private repository under `dataset/evidence/`, and uncertain or incomplete mappings remain explicit.
+## Default controls
 
-`data/` is legacy runtime integration input: the old catalogue, reviewed import graphs, resource fingerprints and preset v8 defaults. It is not merged into the new dataset. Move choices, bindings and bounded speeds remain editable; Ki Pulse, physics and Frost Moon timing stay Engine-owned.
+PlayStation and Xbox labels describe the same logical buttons. Frost Moon requires a Ki Pulse window: hold R1/RB and tap the destination stance button twice.
 
-`configurations/` specifies the new Sword Rebuild 1 sword layout and its four unfinished boss routes. `data/presets/sword-rebuild-1-supported.json` loads the five supported Jin routes; `data/move-policy.json` extends their recovery windows. See [configuration status](configurations/README.md) before using the subset.
+| Input | Move |
+| --- | --- |
+| Low heavy / dodge-heavy | Jin's three-hit string / second cyclone slash |
+| Mid heavy / dodge-heavy | Jin's five-hit string |
+| Low quick | Hideyori's four-hit string |
+| High heavy, then L1/LB + Square/X | Tachibana's instant Omnislice |
+| **Low stance: tap L1/LB + L2/LT** | Sanada's hand-cannon, 1.15× speed; sword hidden during firing |
+| Frost Moon → Low / Mid / High | Flying Swallow / Oda's two slashes at 1.1× / Jin's downward slash |
 
-`review_import.py` reports definition/evidence gaps. `Build.ps1` uses Engine's release gate to package one portable EXE with its own worker and data. The gate checks an isolated copy before release. `desktop/portable_worker.cjs` retains versioned workers in app data so closing the editor cannot remove an enabled Engine's files. See [CODE_GUIDE.md](CODE_GUIDE.md) for module boundaries and migration TODOs; gameplay and controller acceptance remain pending.
+The handgun uses tap-and-release; holding is unassigned by default. A new shot waits for the previous action to finish. [Configuration details](configurations/README.md) separate tested playback from remaining contact and recovery checks.
+
+## Change your bindings
+
+**Moves** shows assignments by stance, including **Hold Triangle / Y**. Select **Launcher only** or **Launcher + Izuna Drop** on supported held, custom or native inputs. For example, use Low held Triangle for the launcher and High held Triangle for Izuna. The drop still needs native enemy contact.
+
+**Controller** changes the custom modifier/trigger buttons and tap/hold actions; press-to-bind listens after you release the controls. There is one custom two-button chord plus native overrides and stance holds. R1/RB stays reserved for Ki Pulse and Frost Moon. Imported graphs need an explicit stance, and launcher-only and full Izuna must use different stances. Invalid combinations explain the conflict before saving.
+
+**Speed** controls bounded playback rates. Clearing a phase restores inheritance; entering `1` requests its native speed. **More** provides extra native inputs, Frost Moon destinations, Help, the original moveset, and moveset import/export. Binding groups let you reuse one part without replacing the rest. Ki Pulse authoring, physics and Frost timing remain developer-controlled.
+
+## Controllers
+
+Xbox uses XInput. For PS5, enable Steam Input for Nioh and select its XInput slot in MWM; the saved PS4 mapping remains available. Disable the mod before changing controller mapping or slot, then save and enable again. With multiple pads connected, choose the intended slot explicitly. Left-stick movement is separate from button binding and Frost Moon edge detection.
+
+Automated checks cover logical Xbox/PS mappings, analog triggers, slot changes, held inputs and native action dispatch. Physical Xbox/PS5 and another-PC acceptance remain pending; raw, uncalibrated DualSense input is not assumed to work.
+
+## How the code works
+
+![Settings travel from UI to validated Engine actions](docs/settings-flow.svg)
+
+`desktop/` owns the Electron/TypeScript/CSS editor. `app/web_worker.py` validates complete drafts through Engine, saves settings atomically and reports lifecycle state. Engine expands selected graphs, loads their assets, and selects private player-adapted actions on the game thread. Borrowed resources and temporary sword visibility are restored on exit; the renderer never writes game memory.
+
+![Recordings become reviewed move graphs and supported bindings](docs/data-flow.svg)
+
+`dataset/` organizes 12 sword strings and one handgun record by weapon and boss, preserving notes and hashed evidence. `data/imports/` describes playable phase graphs; `data/resources/` identifies installed assets; `data/presets/` holds assignments. `dataset/compile_trial.py` reproduces archive matches. Raw recording archives stay in this private repository and are excluded from the EXE.
+
+Sanada demonstrated why animation alone is insufficient: C6A created object IDs `229757` and `944393` at frames 13 and 78, but their models were absent. Its profile now requests native asset keys `3257` and `3258` before activation. The user confirmed firing, the faster timing and sword hiding. Hideyori's zero boss Ki cost required William's native Low-quick costs; live Ki recovery is observed, but manual Pulse acceptance remains pending.
+
+## Evidence and remaining checks
+
+The user confirmed Jin's six routes, Oda's two slashes, Omnislice playback and Sanada's hand-cannon. Isolated Jin Low-heavy testing also confirmed normal movement and death/retry. These results do not establish every enemy contact, projectile damage, camera or mission transition. The initial multi-boss failure exposed a loader hook left attached during pending I/O; Engine now detaches after submission and stops activation on load failure.
+
+Boss action IDs are bank-local keys, not universal move names or boss identifiers. Jin and Oda both use `0x00000C6E`/`0x00000C6F` for different motions. Preserve the full 32-bit key, boss/source bank, payload bytes, motion/timing keys and game build together. One execution can contain several hits, and consecutive IDs do not prove a combo. Actor addresses can change or be reused after a death; generation and action-counter continuity matter more than the address alone.
+
+Hideyori's `0x00000D30 → D31 → D32 → D33` has consecutive observed counters 219–222 and native transition links: enough evidence for a four-phase trial, without inventing a fifth hit. Tachibana's `D8C → D8D` matches the proposed preparation/Omnislice order; the step-back/sheath interpretation is still a hypothesis. Oda's `C6E → C6F` has a native frame-40 continuation. Sanada's `C6A` was observed twice at counters 402/403; `C6B` is only an available native branch. Counter 404 was missed, and a later previous-action pointer suggests `BB8`; neither fact proves another gunshot or its execution time.
+
+The new source action packages match recorded payload prefixes in `archive_00.lnk` entries 147 (Hideyori), 103 (Oda), 107 (Tachibana) and 134 (Sanada). Companion timing/motion/camera triples in `archive_01.lnk` are 4048–4050, 3996–3998, 4005–4007 and 4038–4040 respectively. Their reviewed key sets and adjacency support the trial mapping; matching asset bytes does not prove correct behavior on William. `dataset/compile_trial.py` reproduces these fingerprints without storing extracted game assets.
+
+Match descriptions against the final few relevant executions before Stop, looking past idle/recovery and across all captured actor candidates. A written pause or death is timing context, not proof of an observed memory event. Raw captures stay in their recording library; local development outputs stay inside the repos. Earlier exported previews are retained under ignored `local-artifacts/previous-exports/`.
+
+## Build and release
+
+Keep Engine, MWM and Recorder as sibling checkouts. After `npm ci`, `Trainer.ps1` builds current native libraries and opens the source UI. Engine's `Test-Offline.ps1` runs both maintained suites, including product UI and binding checks.
+
+Close the source editor before building. `Build.ps1` requires clean commits, a pinned Engine, a new version and release notes. It packages and checks an isolated EXE, then records hashes and an immutable version tag. Packaged checks exercise startup, actual UI rebinding, saved settings, XInput translation and bundled assets with game access blocked. [CODE_GUIDE.md](CODE_GUIDE.md) gives module details and future work.

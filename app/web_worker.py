@@ -8,7 +8,7 @@ import sys
 
 import trainer
 from engine_config import DEFAULT_PRESET, atomic_json, binding_for_preset, move_capabilities, read_json, validate_preset
-from game_controller import BindingCapture, GameController, binding_buttons
+from game_controller import BindingCapture, GameController, binding_buttons, game_binding
 from controller_reader import ControllerReader
 from process_support import active_runtime, process_matches
 from trace_reader import Trace
@@ -50,7 +50,9 @@ class Desktop:
             preset = trainer.remap_preset(DEFAULT_PRESET, source_calibration, calibration)
             warning = 'Saved moveset could not be loaded. Showing a baseline draft; the saved file is unchanged. ' + str(error)
         alive = process_matches(read_json(runtime/'play-process.json'))
-        state = read_json(runtime/'play-status.json', {}) if alive else {}
+        state = read_json(runtime/'play-status.json', {})
+        if not alive and state.get('state') not in ('preparation_failed', 'cleanup_needs_attention', 'start_failed', 'runtime_missing'):
+            state = {}
         return dict(runtime=str(runtime), preset=preset, calibration=calibration,
                     buttons=binding_buttons(calibration['device'], calibration.get('button_map')),
                     capabilities=self.capabilities, running=alive,
@@ -70,7 +72,7 @@ class Desktop:
         slot = calibration.get('controller_slot')
         if slot is not None and (type(slot) is not int or slot not in (0, 1, 2, 3)):
             raise ValueError('Controller slot must be automatic or 1–4')
-        binding_for_preset(calibration, preset)
+        game_binding(calibration, binding_for_preset(calibration, preset))
         return preset
 
     def preview(self, params):
@@ -188,9 +190,13 @@ class Desktop:
         if method == 'apply':
             return self.apply(params)
         if method == 'baseline':
-            return trainer.remap_preset(DEFAULT_PRESET, read_json(trainer.ROOT/'data/controller-calibration.json'), params['calibration'])
+            return trainer.remap_preset(validate_preset(read_json(trainer.ROOT/'data/presets/sword-original.json')),
+                                       read_json(trainer.ROOT/'data/controller-calibration.json'), params['calibration'])
         if method == 'starter':
             return trainer.remap_preset(validate_preset(read_json(trainer.ROOT/'data/presets/sword-rebuild-1-supported.json')),
+                                       read_json(trainer.ROOT/'data/controller-calibration.json'), params['calibration'])
+        if method == 'trial':
+            return trainer.remap_preset(validate_preset(read_json(trainer.ROOT/'data/presets/sword-rebuild-1.json')),
                                        read_json(trainer.ROOT/'data/controller-calibration.json'), params['calibration'])
         if method == 'controller':
             choice = params['choice']
