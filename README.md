@@ -1,15 +1,19 @@
-# Tanto Sword Mod
+# MWM  -  Multi-Weapon Moveset Mod
 
-The standalone Nioh 1 Sword Skills Expanded product, developed with Tanto Engine. Users receive `TantoSword.exe`; they do not install or run the development engine. The executable includes the selected micro-runtime, two native libraries, validated Sword definitions and the configuration UI. It excludes engine source headers, tests, research, recordings and recorder tools.
+MWM is the shared application for ten planned Nioh weapon movesets, starting with single katana; Engine owns gameplay integration and Recorder supplies evidence for developer review.
 
-Launch the application, review the bindings and choose **Enable / attach**. **Disable** cooperatively restores owned native state. Closing the window leaves an enabled session running. Settings live under `%LOCALAPPDATA%\Tanto\Sword\runtime` in the packaged application. The game installation provides its assets; the package contains asset identities and checks, not extracted game archives.
+`desktop/` is the Electron, TypeScript and CSS interface; `app/web_worker.py` connects it to Engine's reviewed configuration and lifecycle APIs. After `npm ci`, use `Trainer.ps1` or `npm start` with the pinned sibling Engine and Python. `Trainer.ps1 -LegacyUI` retains the previous trainer for comparison.
 
-## Development and builds
+Collection shows the recorded moves, original notes and integration gaps. The Sword Rebuild 1 button loads its supported subset into the form; Apply saves it. Browsing the collection does not enable candidate moves. Product checks live in `tests/` and run through Engine's existing `Test-Offline.ps1`.
 
-Clone private `neuriv/tanto-engine` next to this checkout. `Trainer.ps1` launches the source UI. `Build.ps1` compiles the engine's native runtime and produces a standalone EXE using the pinned engine revision in `product.json`. Specify `-PythonRuntime` for an environment containing `tanto-engine/requirements-build.txt`. Consumers need neither this source checkout nor the engine checkout.
+Bindings edits the custom chord and controller mapping; Overrides edits stance and native-action replacements; Tuning shows effective per-phase speeds. Blank speed fields inherit, while explicit `1` forces native playback. Live compilation flags conflicts before Apply, and Save as/Load preserve the complete draft. Recorder's artwork is bundled locally with a darker CSS overlay.
 
-`data/preset.json` owns the default bindings. `data/moves.json` owns named move definitions; `data/imports/` owns the implemented action graphs. `data/resources/` identifies exact installed-game archive entries, hashes and native package layouts required by those imports. These profiles are operational build inputs, not recording data. MinHook is compiled into the native runtime; its required license accompanies the application resources.
+Reuse a binding group saves or loads the custom chord, stance overrides, native overrides or Frost Moon independently. Chord files preserve logical buttons across controller mappings; imports preserve unrelated settings and reject incompatible combinations. `app/binding_groups.py` owns this file contract. The runtime still supports one custom chord, alongside its native override slots.
 
-Global weight/impulse and tracking policy is selected by the engine backend at build time. Public settings expose supported bindings and bounded timing controls. Changing private policy requires a development rebuild. A local executable is not an unextractable security boundary.
+`dataset/` holds 12 sword strings and one handgun candidate under weapon/boss folders, with exact notes, ordered IDs and hashed evidence. `intake.json` tracks every source session; `validate.py` checks records and archived evidence. Hashed original recordings are included in this private repository under `dataset/evidence/`, and uncertain or incomplete mappings remain explicit.
 
-The current backend supports Nioh 1 sword integrations. The latest tracking, airborne Izuna contact and weapon/sheath fixes still need gameplay acceptance. Offline tests and packaged startup checks do not establish gameplay success. The previous Downloads workbook remains an archival export; it is no longer a runtime dependency or the configuration source.
+`data/` is legacy runtime integration input: the old catalogue, reviewed import graphs, resource fingerprints and preset v8 defaults. It is not merged into the new dataset. Move choices, bindings and bounded speeds remain editable; Ki Pulse, physics and Frost Moon timing stay Engine-owned.
+
+`configurations/` specifies the new Sword Rebuild 1 sword layout and its four unfinished boss routes. `data/presets/sword-rebuild-1-supported.json` loads the five supported Jin routes; `data/move-policy.json` extends their recovery windows. See [configuration status](configurations/README.md) before using the subset.
+
+`review_import.py` reports definition/evidence gaps. `Build.ps1` uses Engine's release gate to package one portable EXE with its own worker and data. The gate checks an isolated copy before release. `desktop/portable_worker.cjs` retains versioned workers in app data so closing the editor cannot remove an enabled Engine's files. See [CODE_GUIDE.md](CODE_GUIDE.md) for module boundaries and migration TODOs; gameplay and controller acceptance remain pending.

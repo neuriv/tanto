@@ -1,11 +1,11 @@
+# Build a distributable MWM EXE through the shared Engine release gate.
+# The gate owns version/pin checks, tests, packaging, checksums and the immutable version tag.
+# OneDir changes packaging layout only; it does not bypass release validation.
 param([string]$EngineRoot = (Join-Path $PSScriptRoot '..\tanto-engine'), [string]$PythonRuntime = 'python', [switch]$OneDir)
 $ErrorActionPreference = 'Stop'
 $EngineRoot = (Resolve-Path -LiteralPath $EngineRoot).Path
-$manifest = Get-Content (Join-Path $PSScriptRoot 'product.json') -Raw | ConvertFrom-Json
-$revision = git -C $EngineRoot rev-parse HEAD
-if ($LASTEXITCODE -ne 0 -or $revision -ne $manifest.engine_commit) { throw 'Engine revision differs from product.json; review and update the pin before building.' }
-if ($manifest.kind -eq 'sword') { & (Join-Path $EngineRoot 'runtime\native\Build.ps1') }
+# Pass separate arguments so a checkout or Python path containing spaces remains intact.
 $arguments = @('-B', (Join-Path $EngineRoot 'build_product.py'), $PSScriptRoot)
 if ($OneDir) { $arguments += '--onedir' }
 & $PythonRuntime @arguments
-if ($LASTEXITCODE -ne 0) { throw 'Product build failed' }
+if ($LASTEXITCODE -ne 0) { throw 'Release build failed; inspect the build output and .build logs.' }
