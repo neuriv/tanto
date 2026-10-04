@@ -198,13 +198,13 @@ app.whenReady().then(async () => {
       await tab('presets');
       document.querySelector('[data-preset-template="maria_dash"]').click();await ready();await tab('overview');await stance('mid');
       assert(document.querySelector('[data-assignment="native:mid:light_attack"]')?.value==='maria.action_0c8a','Maria dodge preset did not load from Presets');
+      await window.wm.request('test_screenshot','maria');
       document.querySelector('#ishida').click();await ready();await tab('overview');
       for(const [mode,source,move] of [['mid','light_attack','double_slash'],['high','heavy_attack','five_hit'],['low','light_attack','three_hit'],['low','heavy_attack','spin_ender'],['mid','heavy_attack','spin_opener']]) {
         await stance(mode);
         assert(document.querySelector('[data-assignment="native:'+mode+':'+source+'"]')?.value==='ishida_mitsunari.'+move+'_1','Ishida preset is missing '+move);
       }
       assert(JSON.stringify((await window.wm.request('snapshot')).preset)===JSON.stringify(beforeMaria),'Loading a built-in preset unexpectedly saved the draft');
-      await window.wm.request('test_screenshot','maria');
       document.querySelector('#reload').click();await ready();await stance('low');
       assert(document.querySelector('#disable').hidden && !document.querySelector('#enable').hidden,'Disabled runtime shows both actions');
       assert(document.querySelector('#apply').disabled,'Saved moveset still offers redundant save');
