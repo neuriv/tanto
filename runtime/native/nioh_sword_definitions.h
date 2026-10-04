@@ -62,6 +62,8 @@ static bool recorded_grounded(const MoveImport& move, const MoveAdapter& adapter
 }
 
 static inline int16_t recorded_player_ki_cost(const MoveImport& move, const MoveAdapter& adapter, int16_t source_cost) {
+    if (!source_cost && (adapter.kind==2 || adapter.kind==4) && ishida_phase(move))
+        return adapter.kind==2 ? 19 : 14; // Spend William's researched Quick costs before granting recoverable Ki.
     // Hideyori's zero-cost boss string cannot feed William's native recoverable-Ki calculation.
     // Use the supported build's Low-quick CF0..CF3 costs: 19 for the opener, then 14 per strike.
     // Match the full recorded signature; other zero-cost phases, including airborne links, stay unchanged.

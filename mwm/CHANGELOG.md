@@ -1,5 +1,15 @@
 # Release notes
 
+## 0.5.0
+
+- Use Tanto branding and the monochrome revenant-grave logo. The portable editor is now Tanto.exe.
+- Address Ishida issues #26-#29: use William's grounded movement/cancel flags, spend Ki for zero-cost NPC phases, open Pulse/dodge recovery at the attack boundary, and retain the final animation tail for same-button restarts.
+- Fix #31: chords accept either button order, with the existing tap/hold threshold and one-dispatch rule preserved.
+- Add preventive retirement when mission transitions replace motion/timing components without changing the actor/owner address. Retired sessions never restore old resource pointers into replacement components.
+- Expand regressions and review the new movement, recovery, input-order and cleanup paths.
+
+Ishida movement and cancel behavior still need gameplay confirmation. Crash reports #2, #25 and #30 have preventive coverage but no reproduced game crash or verified causal fix. Unsupported Ishida grapple/beam captures remain research-only.
+
 ## 0.4.0
 
 - Add five Ishida sword strings with 19 route-local phases and an editable preset. Preserve repeated C5B phases, shared endings, and C71's separate 91030 timing track.

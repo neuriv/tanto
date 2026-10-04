@@ -116,8 +116,8 @@ class ControllerGesture:
             self.fired = False
         elif not lb:
             self.started = 0
-            self.neutral_seen = False
-        elif self.neutral_seen and not self.started and not self.circle:
+        elif self.neutral_seen and not self.started and (not self.circle or not self.lb):
+            # Start when the last chord button arrives, regardless of press order.
             self.started = now
             self.neutral_seen = False
         self.lb, self.circle = lb, circle

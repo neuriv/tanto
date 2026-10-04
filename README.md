@@ -1,13 +1,17 @@
-# Tanto Engine
+# Tanto
 
-Tanto adapts Nioh 1 boss moves for William. **MWM** is its portable moveset editor; the current gameplay backend supports **single katana**. Recorder is a separate, read-only application for collecting action and resource evidence.
+<img src="mwm/src/assets/tanto.png" alt="Tanto revenant grave logo" width="180">
 
-[Download the latest MWM EXE](https://github.com/neuriv/tanto-engine/releases/latest) · [Playing and controls](mwm/README.md) · [Code guide](CODE_GUIDE.md) · [Release contract](RELEASES.md)
+Tanto adapts Nioh 1 boss moves for William. **Tanto** is its portable moveset editor; the current gameplay backend supports **single katana**. Recorder is a separate, read-only application for collecting action and resource evidence.
+
+[Download the latest Tanto EXE](https://github.com/neuriv/tanto/releases/latest) · [Playing and controls](mwm/README.md) · [Code guide](CODE_GUIDE.md) · [Release contract](RELEASES.md)
+
+The repository was recreated with consolidated history and transferred issues; see [migration details](MIGRATION.md).
 
 ## Start playing
 
-1. Download `MWM.exe`. It contains the editor, Python worker, native runtime and move definitions; players do not need Python or Node.
-2. Enter a Nioh mission with a single katana. Open MWM, choose a preset or assign individual moves, then **Save changes** and **Enable mod**.
+1. Download `Tanto.exe`. It contains the editor, Python worker, native runtime and move definitions; players do not need Python or Node.
+2. Enter a Nioh mission with a single katana. Open Tanto, choose a preset or assign individual moves, then **Save changes** and **Enable mod**.
 3. Disable the mod before editing the active setup. Closing the editor leaves an enabled mod running. After updating native code, restart Nioh before enabling the new version.
 
 Your settings and recordings live outside the EXE. Updates preserve them. Steam Input supplies XInput for supported PlayStation controllers; see the [controller guide](mwm/README.md#controllers).
@@ -38,7 +42,7 @@ The editor saves configuration. The worker prepares resources and publishes inte
 
 ```mermaid
 flowchart LR
-    UI[MWM editor] -->|Validated draft| Worker[Python worker]
+    UI[Tanto editor] -->|Validated draft| Worker[Python worker]
     Worker -->|Atomic save| Preset[Preset v8]
     Preset --> Prepare[Session preparation]
     Data[Reviewed graphs and asset fingerprints] --> Prepare
@@ -109,6 +113,6 @@ npm --prefix .\mwm ci
 
 Tests cover real native code against owned memory, malformed and exhausted resource decoding, configuration and process lifecycle, and the actual Electron editor/worker. Release builds also run a copied EXE in an isolated directory and record source, dependency and artifact hashes.
 
-Offline tests can establish input routing, field widths, graph transitions, resource boundaries and UI transactions. Physical controller behavior, damage, movement, effect persistence and encounter transitions still need gameplay evidence. The earlier uniform Guardian Spirit Talisman/shuriken cancels were verified in game. The new variable windows and Ishida strings require gameplay checks. Open crash reports #2 and #27 remain unresolved; offline checks do not reproduce their causes.
+Offline tests can establish input routing, field widths, graph transitions, resource boundaries and UI transactions. Physical controller behavior, damage, movement, effect persistence and encounter transitions still need gameplay evidence. The earlier uniform Guardian Spirit Talisman/shuriken cancels were verified in game. The new variable windows and Ishida strings require gameplay checks. Open crash reports #2, #25 and #30 remain unresolved; offline checks do not reproduce their causes.
 
 See [the native walkthrough](runtime/native/NATIVE-WALKTHROUGH.md) for memory contracts and [RELEASES.md](RELEASES.md) for immutable versioned builds. Source captures, development tools and private recordings are excluded from the EXE.

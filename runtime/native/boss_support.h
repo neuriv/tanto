@@ -88,7 +88,7 @@ static MoveTiming boss_move_timing(unsigned slot) {
     // Table order resolves C79 variants; Frost bindings and an available successor select their special rows.
     // Unlisted moves keep source recovery and 1x startup rather than inheriting another attack's timing.
     const auto& move=boss_imports[slot];
-    if (const auto* phase=ishida_phase(move)) return {move.next_variant>=0 ? phase->next_frame : phase->end_frame,0,1};
+    if (const auto* phase=ishida_phase(move)) return {phase->next_frame,0,1};
     bool frost_bound=false;
     for (auto frost : boss_frost_variants) frost_bound=frost_bound || frost==slot+1;
     for (const auto& definition : sword_timing_definitions) {
@@ -357,8 +357,9 @@ static bool boss_copy_player_transitions(unsigned slot, const uint8_t* source_de
     const int next_slot=next>0 ? boss_native_successor(slot,uint32_t(next)) : -1;
     // C84's contact ends at40, but its recorded landing clip lasts126 frames.
     // Keep Pulse/dodge recovery while preventing attack spam from cutting off the landing.
-    const int16_t attack_gate=restart>=0 && sword_move_matches({0xC84,1011,0x184C0000,4,13,36},boss_imports[slot],adapter)
-        ? 126 : adapted_recovery;
+    const auto* ishida=ishida_phase(boss_imports[slot]);
+    const int16_t attack_gate=restart>=0 && ishida ? ishida->end_frame
+        : restart>=0 && sword_move_matches({0xC84,1011,0x184C0000,4,13,36},boss_imports[slot],adapter) ? 126 : adapted_recovery;
     bool continuation=false, have_fallback=false;uint8_t fallback[0x30]{};
     for (unsigned i=0; i<count; ++i) {
         uint8_t row_check[0x30];
@@ -396,7 +397,8 @@ static bool boss_copy_player_transitions(unsigned slot, const uint8_t* source_de
             continuation=next_slot>=0;
             continue;
         }
-        if (target == 0xD5F) memcpy(bodies[i]+0x20,&adapted_recovery,2);
+        if (target==0xD5F || (ishida && target==0xD12))
+            memcpy(bodies[i]+0x20,&adapted_recovery,2); // Keep Living Water's native skill/direction gates.
         if ((adapter.kind == 2 || adapter.kind == 4) && ((target >= 0xCF5 && target <= 0xCF7)
             || (target >= 0xCB7 && target <= 0xCB9) || (target >= 0xC7A && target <= 0xC7C)
             || (target==0xD5F && adapted_recovery<0))) {
@@ -526,6 +528,14 @@ static bool boss_prepare_private_action(unsigned slot = 0) {
     // redirects/pending-action modes that could require another context lookup.
     if (key != expected_key || !descriptor[0x40] || source_payload != expected_payload
         || motion != expected_motion || flags != spec.flags) return false;
+    if (ishida_phase(spec)) {
+        // Ishida's NPC flags keep William suspended and omit his grounded cancel policy.
+        // Copy the validated William template's movement permissions; source timing/combat remain owned by Ishida.
+        uint64_t player_payload=0,player_flags=0;
+        if (!copy_field(boss_adapters[slot].player_descriptor+0x20,player_payload)
+            || !copy_field(player_payload+0x18,player_flags) || player_flags!=0x8000000594C0000ULL) return false;
+        memcpy(payload+0x18,&player_flags,8);
+    }
     if (!boss_preserve_weapon(slot,payload)) return false;
     payload[0x0B] = 4; // Native0x70F3A3: keep current+0x470, retain+0x47C=1 behavior.
     for (unsigned stance=0;stance<3;++stance)
@@ -671,6 +681,13 @@ static bool boss_player_valid() {
     uint64_t vtable = 0, owner = 0;
     bool replaced = copy_field(boss_active_player, vtable) && vtable != boss_session.vtable;
     replaced = replaced || (copy_field(boss_active_player + 0x50, owner) && owner != boss_active_owner);
+    // Mission transitions can replace components while retaining the actor and owner addresses.
+    // A proven non-null replacement retires this session; failed/zero reads remain ambiguous.
+    uint64_t component=0;
+    if (owner==boss_active_owner) {
+        replaced=replaced || (copy_field(owner+0x38,component) && component && component!=boss_session.player_motion);
+        replaced=replaced || (copy_field(owner+0x68,component) && component && component!=boss_session.player_timing);
+    }
     MEMORY_BASIC_INFORMATION region{};
     const bool unmapped = VirtualQuery(reinterpret_cast<void*>(boss_active_player), &region, sizeof(region))
         && region.State != MEM_COMMIT;

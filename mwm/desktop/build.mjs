@@ -22,3 +22,5 @@ const design = JSON.parse(await readFile('configurations/sword-rebuild-1.json', 
 const intake = JSON.parse(await readFile('dataset/intake.json', 'utf8'));
 const unreviewed = JSON.parse(await readFile('dataset/unmapped-action-index.json', 'utf8'));
 await writeFile('desktop-dist/collection.json', JSON.stringify({ manifest, moves, design, intake, unreviewed }));
+
+await copyFile('src/assets/tanto.png','desktop-dist/tanto.png');

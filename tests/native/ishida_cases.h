@@ -8,6 +8,7 @@ static void ishida_transition_cases() {
     for (unsigned family : {1u,2u}) {
         replacement_reset();boss_import_count=21;
         const auto source=boss_imports[2];const auto player_adapter=boss_adapters[2];
+        put(heavy_payloads[0].data(),0x18,uint64_t(0x8000000594C0000ULL));
         for (unsigned route=0;route<5;++route) for (unsigned i=roots[route];i<roots[route+1];++i) {
             auto& move=boss_imports[i+2];move=source;move.key=keys[i];move.flags=0x10018480000ULL;
             move.recovery_frame=-1;move.next_variant=i+1<roots[route+1] ? int16_t(i+3) : -1;
@@ -22,7 +23,7 @@ static void ishida_transition_cases() {
             put(descriptors[i],0,move.key);put(descriptors[i],0x20,move.payload);
             put(descriptors[i],0x78,address(pointers[i]));put(descriptors[i],0x82,move.transition_count);
             put(payloads[i],0x18,move.flags);put(payloads[i],0x20,move.motion);put(payloads[i],0x24,int16_t(-1));
-            put(payloads[i],0x16,int16_t(10));entries[i]=move.descriptor;
+            put(payloads[i],0x16,int16_t(0));entries[i]=move.descriptor;
             for (unsigned r=0;r<move.transition_count;++r) {memset(rows[i][r],0xff,0x30);pointers[i][r]=address(rows[i][r]);}
             rows[i][0][10]=2;rows[i][0][11]=0;rows[i][0][12]=1;
             put(rows[i][0],20,int16_t(move.next_variant>=0 ? keys[i+1] : keys[roots[route]]));
@@ -34,12 +35,20 @@ static void ishida_transition_cases() {
             assert(boss_native_successor(i+2,keys[next])==int(next+2));
             assert(boss_prepare_private_action(i+2));
             const auto& clone=boss_private_actions[i+2];unsigned input_rows=0;
+            uint64_t adapted_flags=0;memcpy(&adapted_flags,clone.payload+0x18,8);
+            assert(adapted_flags==0x8000000594C0000ULL); // William's grounded movement/cancel policy.
+            int16_t onset=0,cost=0;memcpy(&onset,clone.payload+0x38,2);memcpy(&cost,clone.payload+0x16,2);
+            assert(cost>0 && onset==ishida_phase(boss_imports[i+2])->next_frame);
+            bool dodge=false;
             for (unsigned r=0;r<clone.transition_count;++r) {
                 const auto* row=clone.transition_bodies[r];int16_t target=0;memcpy(&target,row+20,2);
+                if (target==0xD12) {
+                    int16_t gate=0;memcpy(&gate,row+32,2);assert(gate==onset);dodge=true;
+                }
                 if (target!=int16_t(keys[next])) continue;
                 assert(row[10]==0 || row[10]==2);assert(row[11]==(family==1 ? 0 : 1));++input_rows;
             }
-            assert(input_rows==2);++checks;
+            assert(input_rows==2 && dodge);++checks;
         }
     }
 }

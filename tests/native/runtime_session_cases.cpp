@@ -326,5 +326,11 @@ int main() {
     assert(!boss_retire_destroyed_actor() && boss_active);
     boss_inflight = 0;
     assert(boss_retire_destroyed_actor() && !boss_active);
+    for (unsigned offset : {0x38u,0x68u}) {
+        reset();tick();
+        put(owner.data(),offset,uint64_t(0x12345678));
+        assert(NiohResearchStop(nullptr)==0 && !boss_active);
+        bindings(true); // A replacement component must not receive old resource writes.
+    }
     std::puts("runtime session and recovery checks passed");
 }

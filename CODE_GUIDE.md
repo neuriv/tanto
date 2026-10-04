@@ -1,6 +1,6 @@
 # Read the Engine as a Nioh player
 
-Tanto Engine is the private workshop. MWM supplies the sword moveset and its menu; Recorder collects observations. A recording is evidence of what a boss did, not code that William can immediately execute. The Engine checks source identities, adapts reviewed moves, interprets your controls and manages the resources needed while those moves run.
+Tanto Engine supplies the runtime. The editor supplies the sword moveset and its menu; Recorder collects observations. A recording is evidence of what a boss did, not code that William can immediately execute. The Engine checks source identities, adapts reviewed moves, interprets your controls and manages the resources needed while those moves run.
 
 Start with `runtime/engine_config.py` for selectable moves and settings, then `runtime/prepare_session.py` for the checks required before enabling them. `build_product.py` decides what reaches each EXE. Comments explain ordering, ownership and byte-layout constraints where the code alone is insufficient.
 
@@ -87,7 +87,7 @@ A move's timing table can request a boss vocal at a particular frame. Preparatio
 
 The combined repository keeps the runtime in `runtime/`, the weapon application in `mwm/`, and recording evidence separate from playable imports. Future weapons can share hooks, controller interpretation and resource ownership, but need reviewed adapters and equipped-weapon routing before they appear in the UI. Raw capture history stays out of EXEs.
 
-Engine remains private, Recorder remains a separate read-only product, and MWM begins with the single katana. See `RELEASES.md` for version, test, checksum and immutable-tag rules. Source comments do not update an existing EXE; any new distributable build must receive an unused release version.
+The engine and editor are public; Recorder remains a separate read-only product. The editor currently supports single katana. See `RELEASES.md` for version, test, checksum and immutable-tag rules. Source comments do not update an existing EXE; any new distributable build must receive an unused release version.
 
 ## Cast-cancel profiles
 

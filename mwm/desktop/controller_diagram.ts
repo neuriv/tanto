@@ -95,7 +95,7 @@ export function createControllerDiagram(layout: Layout): HTMLElement {
 
   const note = document.createElement('p');
   note.className = 'controller-diagram__note';
-  note.textContent = 'MWM adds custom chords and selected sword routes. Nioh keeps its other controller inputs.';
+  note.textContent = 'Tanto adds custom chords and selected sword routes. Nioh keeps its other controller inputs.';
   section.append(header, stage, note);
 
   function show(value: Layout) {

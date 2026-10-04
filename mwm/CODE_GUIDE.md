@@ -1,6 +1,6 @@
 # Read MWM as a Nioh player
 
-MWM means **Multi-Weapon Moveset Mod**. This folder is the weapon application inside Tanto Engine, starting with the existing single-katana moveset. It owns selectable moves, defaults and the consumer interface; `../runtime/` owns native integration and reviewed adaptations. Recorder remains separate, and incoming working captures stay outside these source repositories.
+Tanto is the moveset editor; the internal `mwm/` directory retains its historical name. This folder is the weapon application inside Tanto Engine, starting with the existing single-katana moveset. It owns selectable moves, defaults and the consumer interface; `../runtime/` owns native integration and reviewed adaptations. Recorder remains separate, and incoming working captures stay outside these source repositories.
 
 Reviewed intake snapshots now live in this private repo under `dataset/evidence/`; working Recorder folders remain in Downloads. `desktop/build.mjs` embeds the readable dataset and design in the app, while raw archives stay out of the consumer package. MWM's product-specific tests live in `tests/`; Engine's existing offline entrypoint loads them alongside generic Engine checks.
 

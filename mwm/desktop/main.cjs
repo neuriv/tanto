@@ -6,6 +6,8 @@ const { createInterface } = require('node:readline');
 const path = require('node:path');
 const fs = require('node:fs');
 const root = path.resolve(__dirname, '..');
+// Keep the installed settings and immutable worker cache across the branding change.
+if (app.isPackaged) app.setPath('userData', path.join(app.getPath('appData'), 'MWM'));
 const smokeIndex = process.argv.indexOf('--ui-smoke');
 const smokeReport = smokeIndex < 0 ? null : path.resolve(process.argv[smokeIndex + 1]);
 if (smokeReport) {
@@ -75,7 +77,7 @@ function startWorker() {
 
 function call(method, params = {}) {
   // Bound each request independently so a stalled worker cannot leave the UI inert forever.
-  if (!worker || !worker.stdin.writable) return Promise.reject(new Error('Engine worker unavailable; reopen MWM'));
+  if (!worker || !worker.stdin.writable) return Promise.reject(new Error('Engine worker unavailable; reopen Tanto'));
   return new Promise((resolve, reject) => {
     const id = ++nextId;
     const timer = setTimeout(() => {
@@ -91,7 +93,7 @@ async function request(event, method, params = {}) {
   if (event.sender !== window.webContents || event.senderFrame !== window.webContents.mainFrame) throw new Error('Unknown window');
   if (method === 'export' || method === 'binding_export') {
     const group = method === 'binding_export';
-    const selected = await dialog.showSaveDialog(window, { title: group ? 'Save binding group' : 'Save moveset', defaultPath: path.join(app.getPath('downloads'), group ? 'MWM-bindings.json' : 'MWM-moveset.json'), filters: [{ name: group ? 'Binding group' : 'Moveset', extensions: ['json'] }] });
+    const selected = await dialog.showSaveDialog(window, { title: group ? 'Save binding group' : 'Save moveset', defaultPath: path.join(app.getPath('downloads'), group ? 'Tanto-bindings.json' : 'Tanto-moveset.json'), filters: [{ name: group ? 'Binding group' : 'Moveset', extensions: ['json'] }] });
     return selected.canceled ? null : call(method, { ...params, path: selected.filePath });
   }
   if (method === 'import' || method === 'binding_import' || method === 'game_path') {
@@ -109,7 +111,7 @@ async function request(event, method, params = {}) {
 async function openWindow() {
   // Preload is the sole bridge from the sandboxed renderer to OS privileges.
   startWorker();
-  window = new BrowserWindow({ show: !smokeReport, width: 1120, height: 840, minWidth: 860, minHeight: 640, backgroundColor: '#11151c', title: 'MWM · Multi-Weapon Moveset Mod', autoHideMenuBar: true, webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, sandbox: true, nodeIntegration: false, backgroundThrottling: !smokeReport } });
+  window = new BrowserWindow({ show: !smokeReport, width: 1120, height: 840, minWidth: 860, minHeight: 640, backgroundColor: '#11151c', title: 'Tanto', icon: path.join(__dirname, 'tanto.png'), autoHideMenuBar: true, webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, sandbox: true, nodeIntegration: false, backgroundThrottling: !smokeReport } });
   window.on('close', event => {
     if (cycling) { event.preventDefault(); closeAfterCycle = true; window.hide(); }
   });
@@ -158,7 +160,7 @@ else {
   });
   app.whenReady().then(openWindow).catch(error => {
     if (smokeReport) fs.writeFileSync(smokeReport, JSON.stringify({passed:false,error:String(error)}));
-    else dialog.showErrorBox('MWM could not start', String(error));
+    else dialog.showErrorBox('Tanto could not start', String(error));
     app.exit(1);
   });
 }

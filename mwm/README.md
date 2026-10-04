@@ -1,16 +1,16 @@
-# MWM â€” Multi-Weapon Moveset Mod
+# Tanto moveset editor
 
 A portable Nioh moveset editor, starting with single katana. Choose the moves assigned to your inputs, adjust their speed, and save reusable bindings. Ten weapon movesets are planned; the current runtime supports sword.
 
-![MWM moveset editor](docs/mwm-ui.png)
+![Tanto moveset editor](docs/mwm-ui.png)
 
 The **How to use** tab walks through the four-step edit, route, controller, and save workflow.
 
 ## Start playing
 
-Download **MWM.exe** from [Latest release](https://github.com/neuriv/tanto-engine/releases/latest). The EXE contains its own interface, Engine worker and move definitions; no Python, Node or extra asset downloads are needed. Nioh itself must be installed.
+Download **Tanto.exe** from [Latest release](https://github.com/neuriv/tanto/releases/latest). The EXE contains its own interface, Engine worker and move definitions; no Python, Node or extra asset downloads are needed. Nioh itself must be installed.
 
-Open Nioh, enter a mission with a single katana, then open MWM. New installs start with **Sword Rebuild 1**; existing saved settings stay intact. Choose your assignments and **Save changes**, then **Enable mod**. Disable the mod before saving edits; invalid drafts stay in the editor and never change the running moveset. Use **Disable mod** to return to normal gameplay; closing the editor leaves an enabled mod running. After an Engine update, restart Nioh before enabling the new EXE. Stop retains native code until the game exits; mixing builds is blocked.
+Open Nioh, enter a mission with a single katana, then open Tanto. New installs start with **Sword Rebuild 1**; existing saved settings stay intact. Choose your assignments and **Save changes**, then **Enable mod**. Disable the mod before saving edits; invalid drafts stay in the editor and never change the running moveset. Use **Disable mod** to return to normal gameplay; closing the editor leaves an enabled mod running. After an Engine update, restart Nioh before enabling the new EXE. Stop retains native code until the game exits; mixing builds is blocked.
 
 ## Default controls
 
@@ -65,9 +65,9 @@ The dodge preset swaps Mid Quick for the dodge-slash string. Continue pressing t
 
 Press again for each phase. The grapple and two beam recordings remain unsupported. These new strings pass offline routing checks; animation, movement, contact and effects still need gameplay verification.
 
-Onmyo and shuriken cancels use fixed windows per source phase, independent of the selected preset. The shipped pool has 76 phases, including William's 20 native Quick/Strong stages: 46 allow Onmyo and 53 allow shurikens (60%/70%, rounded, with overlap). A successful cancel needs a fresh R1/RB press 2–8 frames after the observed effect-release cue, inside a 5–10-frame window. The original native Pulse deadline still applies. An early press or hold does not queue a cancel; casting from idle creates no window.
+Onmyo and shuriken cancels use fixed windows per source phase, independent of the selected preset. The shipped pool has 76 phases, including William's 20 native Quick/Strong stages: 46 allow Onmyo and 53 allow shurikens (60%/70%, rounded, with overlap). A successful cancel needs a fresh R1/RB press 2ï¿½8 frames after the observed effect-release cue, inside a 5ï¿½10-frame window. The original native Pulse deadline still applies. An early press or hold does not queue a cancel; casting from idle creates no window.
 
-The prior uniform cast behavior was tested in game. New timing windows, Ishida moves and Maria's longer final horizontal-string recovery need a fresh gameplay check. Crash reports #2 and #27 remain open because their causes have not been reproduced.
+The prior uniform cast behavior was tested in game. New timing windows, Ishida moves and Maria's longer final horizontal-string recovery need a fresh gameplay check. Crash reports #2, #25 and #30 remain open because their causes have not been reproduced.
 
 ## Controllers
 
@@ -103,6 +103,6 @@ Match descriptions against the final few relevant executions before Stop, lookin
 
 ## Build and release
 
-MWM lives in this repository's `mwm/` folder. Keep Recorder beside the repository for integration tests. After `npm ci` in `mwm/`, `Trainer.ps1` builds current native libraries and opens the source UI. The repository root's `Test-Offline.ps1` runs both maintained suites, including product UI and binding checks.
+The editor lives in this repository's `mwm/` folder. Keep Recorder beside the repository for integration tests. After `npm ci` in `mwm/`, `Trainer.ps1` builds current native libraries and opens the source UI. The repository root's `Test-Offline.ps1` runs both maintained suites, including product UI and binding checks.
 
 Close the source editor before building. `Build.ps1` requires clean source, a new version and release notes. It packages and checks an isolated EXE, then records hashes and an immutable version tag. Packaged checks exercise startup, Maria presets, actual UI rebinding, saved settings, controller translation and bundled assets with game access blocked. [The architecture diagrams](../README.md#architecture) and [code guide](../CODE_GUIDE.md) explain the module boundaries.
