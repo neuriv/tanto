@@ -6,7 +6,7 @@ import tempfile
 import unittest
 
 ROOT=Path(__file__).resolve().parents[2]
-MOD=ROOT/'mwm'
+MOD=ROOT/'wm'
 sys.path[:0]=[str(MOD),str(MOD/'app'),str(ROOT/'runtime')]
 from review_import import review_import
 

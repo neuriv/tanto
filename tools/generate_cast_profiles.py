@@ -11,7 +11,7 @@ def sources():
     # Paired attacks own another actor and cannot enter William's ordinary cast path.
     keys = ('key', 'motion', 'flags', 'transition_count', 'recovery_frame')
     moves = {tuple(move[key] for key in keys)
-             for path in (ROOT / 'mwm/data/imports').glob('*.json')
+             for path in (ROOT / 'wm/data/imports').glob('*.json')
              for move in json.loads(path.read_text(encoding='utf-8'))['moves']
              if move.get('adapter_kind') != 3 and move['flags'] not in (0x8078000000, 0x8038000000)}
     # Exact native Quick/Strong stages; rows=0 distinguishes these from imported signatures.

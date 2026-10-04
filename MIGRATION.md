@@ -26,4 +26,4 @@ All 31 issues were transferred through GitHub with their authors, content, comme
 | 32 | 30 |
 | 33 | 31 |
 
-Original entries 22 and 23 were pull requests; their metadata is archived rather than converted into issues. The existing `mwm/` source directory, application ID and saved-settings location remain compatible. The distributed editor and its logo are now named Tanto.
+Original entries 22 and 23 were pull requests; their metadata is archived rather than converted into issues. The weapon application now lives in `wm/`, with WM meaning Weapons Mod. Existing settings directories and binding exports remain readable through legacy compatibility identifiers. The distributed editor and its logo are named Tanto.

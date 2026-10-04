@@ -85,9 +85,9 @@ def require_stopped(pid):
         try:
             actual = hashlib.sha256(Path(module['path']).read_bytes()).hexdigest()
         except OSError as error:
-            raise ResourceLoadError('Cannot verify a retained MWM module. Restart Nioh before enabling this version.') from error
+            raise ResourceLoadError('Cannot verify a retained WM module. Restart Nioh before enabling this version.') from error
         if actual != expected[kind]:
-            raise ResourceLoadError('A different MWM Engine build is still loaded. Restart Nioh before enabling this version; Disable alone cannot unload retained native code.')
+            raise ResourceLoadError('A different WM Engine build is still loaded. Restart Nioh before enabling this version; Disable alone cannot unload retained native code.')
 
 
 def resolve_imports(game, stable, bank, motion_bank, timing_wrapper, manifest):

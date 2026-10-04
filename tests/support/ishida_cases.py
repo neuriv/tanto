@@ -11,7 +11,7 @@ ROOT=Path(__file__).resolve().parents[2]
 
 class IshidaTests(unittest.TestCase):
     def test_all_five_routes_keep_repetitions_stances_and_timing_override(self):
-        preset=json.loads((ROOT/'mwm/data/presets/sword-ishida.json').read_text())
+        preset=json.loads((ROOT/'wm/data/presets/sword-ishida.json').read_text())
         moves=configured_replacements(preset)['moves']
         settings=compiled_move_settings(preset,moves)
         self.assertEqual(len(moves),19)
@@ -30,7 +30,7 @@ class IshidaTests(unittest.TestCase):
             self.assertEqual(keys,expected[binding['move'].split('.')[1][:-2]])
 
     def test_aliases_reject_changed_source_and_cyclic_routes(self):
-        manifest=read_import_manifest(ROOT/'mwm/data/imports/ishida_mitsunari.json')
+        manifest=read_import_manifest(ROOT/'wm/data/imports/ishida_mitsunari.json')
         moves=copy.deepcopy(manifest['moves']);moves[1]['motion']+=1
         with self.assertRaises(ValueError):check_import_topology(moves,None)
         moves=copy.deepcopy(manifest['moves']);moves[1]['next_variant']=0

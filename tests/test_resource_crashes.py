@@ -17,7 +17,7 @@ from unittest.mock import patch
 from types import SimpleNamespace
 
 ROOT = Path(__file__).resolve().parents[1]
-MOD_ROOT = ROOT/'mwm'
+MOD_ROOT = ROOT/'wm'
 sys.path.insert(0, str(ROOT / 'runtime'))
 from resource_assets import read_asset
 from native_loader import NIOH

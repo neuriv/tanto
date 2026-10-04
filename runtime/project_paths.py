@@ -3,6 +3,6 @@ import os
 from pathlib import Path
 
 ENGINE_ROOT = Path(__file__).resolve().parents[1]
-MOD_ROOT = Path(os.environ.get('TANTO_MOD_ROOT', ENGINE_ROOT/'mwm' if (ENGINE_ROOT/'mwm/data/mod.json').is_file()
+MOD_ROOT = Path(os.environ.get('TANTO_MOD_ROOT', ENGINE_ROOT/'wm' if (ENGINE_ROOT/'wm/data/mod.json').is_file()
                               else ENGINE_ROOT)).resolve()
 DATA = MOD_ROOT/'data'

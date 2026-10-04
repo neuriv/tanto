@@ -1,10 +1,10 @@
 # Tanto
 
-<img src="mwm/src/assets/tanto.png" alt="Tanto revenant grave logo" width="180">
+<img src="wm/src/assets/tanto.png" alt="Tanto revenant grave logo" width="180">
 
-Tanto adapts Nioh 1 boss moves for William. **Tanto** is its portable moveset editor; the current gameplay backend supports **single katana**. Recorder is a separate, read-only application for collecting action and resource evidence.
+Tanto adapts Nioh 1 boss moves for William. **WM (Weapons Mod)** is its weapon application and portable moveset editor; the current gameplay backend supports **single katana**. Recorder is a separate, read-only application for collecting action and resource evidence.
 
-[Download the latest Tanto EXE](https://github.com/neuriv/tanto/releases/latest) · [Playing and controls](mwm/README.md) · [Code guide](CODE_GUIDE.md) · [Release contract](RELEASES.md)
+[Download the latest Tanto EXE](https://github.com/neuriv/tanto/releases/latest) · [Playing and controls](wm/README.md) · [Code guide](CODE_GUIDE.md) · [Release contract](RELEASES.md)
 
 The repository was recreated with consolidated history and transferred issues; see [migration details](MIGRATION.md).
 
@@ -14,7 +14,7 @@ The repository was recreated with consolidated history and transferred issues; s
 2. Enter a Nioh mission with a single katana. Open Tanto, choose a preset or assign individual moves, then **Save changes** and **Enable mod**.
 3. Disable the mod before editing the active setup. Closing the editor leaves an enabled mod running. After updating native code, restart Nioh before enabling the new version.
 
-Your settings and recordings live outside the EXE. Updates preserve them. Steam Input supplies XInput for supported PlayStation controllers; see the [controller guide](mwm/README.md#controllers).
+Your settings and recordings live outside the EXE. Updates preserve them. Steam Input supplies XInput for supported PlayStation controllers; see the [controller guide](wm/README.md#controllers).
 
 ## Moves and inputs
 
@@ -54,12 +54,12 @@ flowchart LR
 
 | Area | Responsibility |
 | --- | --- |
-| `mwm/desktop/` | Electron editor, controller capture and guide |
-| `mwm/app/web_worker.py` | Request protocol, complete-draft validation and saved presets |
+| `wm/desktop/` | Electron editor, controller capture and guide |
+| `wm/app/web_worker.py` | Request protocol, complete-draft validation and saved presets |
 | `runtime/engine_config.py`, `prepare_session.py` | Compile bindings, match the game/player and resolve required resources |
 | `runtime/supervisor.py`, `run_dispatch.py` | Process ownership, attachment, controller intent and trace collection |
 | `runtime/native/` | Game-thread hooks, private action graphs, timing and owned-resource restoration |
-| `mwm/data/`, `mwm/dataset/` | Playable definitions, presets and preserved recording evidence |
+| `wm/data/`, `wm/dataset/` | Playable definitions, presets and preserved recording evidence |
 
 ### From recording to playable move
 
@@ -105,10 +105,10 @@ Use PowerShell 7, Python with `requirements-build.txt`, an x64 C++17 MinGW toolc
 ```powershell
 # From the repository root
 python -m pip install -r .\requirements-build.txt
-npm --prefix .\mwm ci
+npm --prefix .\wm ci
 .\runtime\native\Build.ps1
 .\Test-Offline.ps1 -PythonRuntime python
-.\mwm\Trainer.ps1 -PythonRuntime python
+.\wm\Trainer.ps1 -PythonRuntime python
 ```
 
 Tests cover real native code against owned memory, malformed and exhausted resource decoding, configuration and process lifecycle, and the actual Electron editor/worker. Release builds also run a copied EXE in an isolated directory and record source, dependency and artifact hashes.

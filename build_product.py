@@ -29,7 +29,7 @@ def source_state(project):
 def release_inputs(project):
     # Reject a release whose version, notes, source or dependencies cannot be traced.
     # Check both local and remote tags so another checkout cannot silently reuse a published version.
-    # The integrated Engine/MWM checkout and the separate Recorder enter the receipt.
+    # The integrated Engine/WM checkout and the separate Recorder enter the receipt.
     spec=json.loads((project/'product.json').read_text(encoding='utf8'))
     version=spec.get('version','')
     if not re.fullmatch(r'(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-(?:alpha|beta|rc)\.[1-9]\d*)?',version):
@@ -39,7 +39,7 @@ def release_inputs(project):
     repositories=(ROOT,project) if spec['kind']=='recorder' else (ROOT,)
     sources={p.name:source_state(p) for p in repositories}
     if any(state['dirty'] for state in sources.values()):
-        raise ValueError('Commit Engine/MWM and Recorder source changes before compiling an EXE')
+        raise ValueError('Commit Engine/WM and Recorder source changes before compiling an EXE')
     if spec['kind']=='recorder' and spec.get('engine_commit')!=sources[ROOT.name]['commit']:
         raise ValueError('Review and pin this Engine revision in product.json before packaging')
     used=(project/'dist'/version).exists()
@@ -223,7 +223,7 @@ def main():
                 import os
                 environment={key:value for key,value in os.environ.items()
                              if key.upper() not in ('PYTHONHOME','PYTHONPATH','TANTO_ENGINE_ROOT','TANTO_PRODUCT_ROOT',
-                                'TANTO_MOD_ROOT','TANTO_RUNTIME_CODE','NIOH_RUNTIME_HOME','NIOH_CATALOGUE_PATH','NIOH_PYTHON','MWM_UI_SMOKE')}
+                                'TANTO_MOD_ROOT','TANTO_RUNTIME_CODE','NIOH_RUNTIME_HOME','NIOH_CATALOGUE_PATH','NIOH_PYTHON','WM_UI_SMOKE')}
                 environment['TANTO_STATE_ROOT']=str(isolated/'state')
                 # Temporary settings and worker caches stay out of the published release folder.
                 # Copy back only the result; ordinary user configuration is never used by this check.

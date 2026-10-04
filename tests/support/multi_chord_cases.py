@@ -8,7 +8,7 @@ import sys
 import unittest
 
 ROOT=Path(__file__).resolve().parents[2]
-sys.path[:0]=[str(ROOT/'runtime'),str(ROOT/'mwm/app')]
+sys.path[:0]=[str(ROOT/'runtime'),str(ROOT/'wm/app')]
 from engine_config import DEFAULT_PRESET, binding_for_preset, move_capabilities, validate_preset
 from game_controller import GAME_DEVICE, game_binding, saved_buttons
 from gestures import RoutedGesture
@@ -18,7 +18,7 @@ from trainer import remap_preset
 from binding_groups import export_group, import_group
 from web_worker import Desktop
 
-DS4=json.loads((ROOT/'mwm/data/controller-calibration.json').read_text())
+DS4=json.loads((ROOT/'wm/data/controller-calibration.json').read_text())
 XBOX=dict(device=GAME_DEVICE,lb_mask=0x100)
 
 

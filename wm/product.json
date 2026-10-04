@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "kind": "sword",
+  "name": "Tanto",
+  "version": "0.5.1",
+  "desktop": "electron",
+  "worker_name": "WMWorker"
+}

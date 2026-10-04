@@ -16,7 +16,7 @@ from prepare_session import configured_replacements, compiled_move_settings
 
 class MariaTests(unittest.TestCase):
     def preset(self, name='sword-maria'):
-        return json.loads((ROOT/'mwm/data/presets'/f'{name}.json').read_text())
+        return json.loads((ROOT/'wm/data/presets'/f'{name}.json').read_text())
 
     def test_presets_compile_stance_and_continuation_ownership(self):
         for name in ('sword-maria', 'sword-maria-dash'):
@@ -25,7 +25,7 @@ class MariaTests(unittest.TestCase):
             settings = dict(zip((m['id'] for m in moves), compiled_move_settings(preset, moves)))
             self.assertEqual(len(moves), 11)  # Eight Maria phases plus the retained Jin Pulse-test skill.
             for binding in preset['skill_bindings'][:3]:
-                manifest = read_import_manifest(ROOT/'mwm/data/imports/maria.json')
+                manifest = read_import_manifest(ROOT/'wm/data/imports/maria.json')
                 for child in manifest['hold_chains'][binding['move']]:
                     self.assertEqual(settings[child]['input_family'], 2 if binding['source']=='heavy_attack' else 1)
                     move = next(m for m in moves if m['id']==child)
@@ -45,7 +45,7 @@ class MariaTests(unittest.TestCase):
         self.assertIn('maria.action_0c89', FROST_MOVES)
 
     def test_source_signatures_reject_colliding_actions(self):
-        manifest = read_import_manifest(ROOT/'mwm/data/imports/maria.json')
+        manifest = read_import_manifest(ROOT/'wm/data/imports/maria.json')
         self.assertEqual(len(manifest['moves']), 9)
         self.assertEqual(manifest['hold_chains']['maria.action_0c89'], ['maria.action_0c89'])
         for move in manifest['moves']:
@@ -57,17 +57,17 @@ class MariaTests(unittest.TestCase):
 
     def test_selected_capture_steps_match_immutable_archives(self):
         import importlib.util
-        spec = importlib.util.spec_from_file_location('maria_dataset', ROOT/'mwm/dataset/validate.py')
+        spec = importlib.util.spec_from_file_location('maria_dataset', ROOT/'wm/dataset/validate.py')
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
-        records = module.load_dataset(ROOT/'mwm/dataset')
+        records = module.load_dataset(ROOT/'wm/dataset')
         selected = {k:v for k,v in records.items() if v['boss_id']=='maria' and v['steps']}
         self.assertEqual(len(selected), 6)
-        self.assertEqual(module.verify_evidence(selected, ROOT/'mwm/dataset/evidence'), 6)
+        self.assertEqual(module.verify_evidence(selected, ROOT/'wm/dataset/evidence'), 6)
 
     def test_compiler_rejects_havok_file_in_camera_position(self):
         import importlib.util
-        spec = importlib.util.spec_from_file_location('maria_compiler', ROOT/'mwm/dataset/compile_trial.py')
+        spec = importlib.util.spec_from_file_location('maria_compiler', ROOT/'wm/dataset/compile_trial.py')
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
         packages = [(b'action', {}), (b'TMG_PACK', {}), (b'G2A_PACK', {}), (b'\x182011-04', {})]
