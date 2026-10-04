@@ -1,5 +1,13 @@
 # Release notes
 
+## 0.5.2
+
+- Adapt all 19 Ishida sword phases to William's default collision presets. The previous flags-only adaptation still installed Ishida's NPC collision set 4 on William.
+- Disable Ishida's private environment-hit recoil exits. Preserve other moves' recoil, enemy guard deflection, damage/death exits, source combat tables, timed effects and animation timing.
+- Reproduce the released collision-preset and wall-recoil omissions in native fixtures; cover both attack buttons, all five strings, unchanged source data and rejection of incompatible player collision presets.
+
+Offline native and packaged checks do not confirm the reported lift or wall behavior in gameplay. The user requested offline work; in-game acceptance remains pending.
+
 ## 0.5.1
 
 - Rename the weapon application to WM (Weapons Mod), including its `wm/` directory, worker, IPC channels, test variables, package identity, documentation and screenshots. The distributed editor remains Tanto.exe.

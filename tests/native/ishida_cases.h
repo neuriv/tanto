@@ -9,6 +9,8 @@ static void ishida_transition_cases() {
         replacement_reset();boss_import_count=21;
         const auto source=boss_imports[2];const auto player_adapter=boss_adapters[2];
         put(heavy_payloads[0].data(),0x18,uint64_t(0x8000000594C0000ULL));
+        put(heavy_payloads[0].data(),0x2A,int16_t(-1));
+        put(heavy_payloads[0].data(),0x2C,int16_t(-1));
         for (unsigned route=0;route<5;++route) for (unsigned i=roots[route];i<roots[route+1];++i) {
             auto& move=boss_imports[i+2];move=source;move.key=keys[i];move.flags=0x10018480000ULL;
             move.recovery_frame=-1;move.next_variant=i+1<roots[route+1] ? int16_t(i+3) : -1;
@@ -23,6 +25,12 @@ static void ishida_transition_cases() {
             put(descriptors[i],0,move.key);put(descriptors[i],0x20,move.payload);
             put(descriptors[i],0x78,address(pointers[i]));put(descriptors[i],0x82,move.transition_count);
             put(payloads[i],0x18,move.flags);put(payloads[i],0x20,move.motion);put(payloads[i],0x24,int16_t(-1));
+            // Archive-matched NPC collision set and scheduled trail/control events.
+            // Zero-filled source payloads masked the collision-preset regression.
+            put(payloads[i],0,uint64_t(0x10000010002ULL));
+            put(payloads[i],0x2A,int16_t(4));put(payloads[i],0x2C,int16_t(-1));
+            put(payloads[i],0x40,int16_t(31));put(payloads[i],0x42,int16_t(0));put(payloads[i],0x44,int16_t(-1));
+            put(payloads[i],0x9A,int16_t(29));put(payloads[i],0x9C,int16_t(0));put(payloads[i],0x9E,int16_t(-1));
             put(payloads[i],0x16,int16_t(0));entries[i]=move.descriptor;
             for (unsigned r=0;r<move.transition_count;++r) {memset(rows[i][r],0xff,0x30);pointers[i][r]=address(rows[i][r]);}
             rows[i][0][10]=2;rows[i][0][11]=0;rows[i][0][12]=1;
@@ -36,12 +44,21 @@ static void ishida_transition_cases() {
             assert(boss_prepare_private_action(i+2));
             const auto& clone=boss_private_actions[i+2];unsigned input_rows=0;
             uint64_t adapted_flags=0;memcpy(&adapted_flags,clone.payload+0x18,8);
-            assert(adapted_flags==0x8000000594C0000ULL); // William's grounded movement/cancel policy.
+            assert(adapted_flags==0x8000000594C0000ULL);
+            int16_t collision_set=0;memcpy(&collision_set,clone.payload+0x2A,2);
+            assert(collision_set==-1 && payloads[i][0x2A]==4);
+            assert(!memcmp(clone.payload,payloads[i],8)); // Unrelated source controls remain intact.
+            assert(!memcmp(clone.payload+0x40,payloads[i]+0x40,0x60));
+            assert(!memcmp(clone.descriptor+0x48,descriptors[i]+0x48,0x30)); // Combat tables stay source-owned.
             int16_t onset=0,cost=0;memcpy(&onset,clone.payload+0x38,2);memcpy(&cost,clone.payload+0x16,2);
             assert(cost>0 && onset==ishida_phase(boss_imports[i+2])->next_frame);
             bool dodge=false;
             for (unsigned r=0;r<clone.transition_count;++r) {
                 const auto* row=clone.transition_bodies[r];int16_t target=0;memcpy(&target,row+20,2);
+                uint16_t condition=0;memcpy(&condition,row,2);
+                if (condition==0x15) assert(target==-1); // Both wall-recoil rows are disabled.
+                if (condition==0xA4) assert(target==0xD1F || target==0xD20); // Enemy guard deflection remains native.
+                if (condition==0x34) assert(target==0xE0); // Death remains native.
                 if (target==0xD12) {
                     int16_t gate=0;memcpy(&gate,row+32,2);assert(gate==onset);dodge=true;
                 }
@@ -49,6 +66,24 @@ static void ishida_transition_cases() {
                 assert(row[10]==0 || row[10]==2);assert(row[11]==(family==1 ? 0 : 1));++input_rows;
             }
             assert(input_rows==2 && dodge);++checks;
+            if (!i) {
+                // A preset key from William cannot be looked up in Ishida's source bank.
+                for (unsigned offset : {0x2Au,0x2Cu}) {
+                    put(heavy_payloads[0].data(),offset,int16_t(4));
+                    assert(!boss_prepare_private_action(i+2));
+                    put(heavy_payloads[0].data(),offset,int16_t(-1));
+                    assert(boss_prepare_private_action(i+2));++checks;
+                }
+            }
         }
+        // Colliding action IDs and other boss signatures keep William's ordinary recoil rows.
+        boss_imports[2]=source;boss_adapters[2]=player_adapter;boss_private_actions[2]={};
+        assert(boss_prepare_private_action(2));unsigned recoil_rows=0;
+        for (unsigned r=0;r<boss_private_actions[2].transition_count;++r) {
+            const auto* row=boss_private_actions[2].transition_bodies[r];uint16_t condition=0;int16_t target=0;
+            memcpy(&condition,row,2);memcpy(&target,row+20,2);
+            if (condition==0x15 && (target==0xD1F || target==0xD20)) ++recoil_rows;
+        }
+        assert(recoil_rows==2);++checks;
     }
 }

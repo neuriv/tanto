@@ -1,5 +1,7 @@
 # Reported WM issues
 
+The 0.5.2 Ishida patch replaces the NPC collision presets at payload `+2A/+2C` with William's validated defaults and disables the two environment-hit recoil exits in private player transitions. The earlier flags-only adaptation did not address the reported lift. Native fixtures reproduce both omissions in released code and cover all 19 phases with both attack buttons. Source combat/effect tables and other moves' recoil remain intact. Ground height and wall behavior still need gameplay acceptance; offline checks do not close those reports.
+
 The table records alpha.7 findings. Later source-runtime observations are below it; they do not certify a packaged EXE.
 
 | Issue | Mechanism and result |

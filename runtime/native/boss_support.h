@@ -377,6 +377,12 @@ static bool boss_copy_player_transitions(unsigned slot, const uint8_t* source_de
         }
         int16_t target=0; memcpy(&target,bodies[i]+0x14,2);
         uint16_t condition=0;memcpy(&condition,bodies[i],2);
+        // Native71DE6F/71E434 set contact bit35 on an environment hit; condition15
+        // reads it at737758. D1F/D20 are William's recoil exits. Keep guard-hit,
+        // damage, death and world collision behavior; disable these private exits only.
+        if (ishida && condition==0x15 && (target==0xD1F || target==0xD20)) {
+            const int16_t disabled=-1;memcpy(bodies[i]+0x14,&disabled,2);
+        }
         if (target==(quick_string ? 0xBBF : 0xBC0) && condition==93
             && bodies[i][0x0A]==0 && bodies[i][0x0B]==(quick_string ? 0 : 1) && bodies[i][0x0C]==1) {
             memcpy(fallback,bodies[i],sizeof(fallback));have_fallback=true;
@@ -529,12 +535,19 @@ static bool boss_prepare_private_action(unsigned slot = 0) {
     if (key != expected_key || !descriptor[0x40] || source_payload != expected_payload
         || motion != expected_motion || flags != spec.flags) return false;
     if (ishida_phase(spec)) {
-        // Ishida's NPC flags keep William suspended and omit his grounded cancel policy.
-        // Copy the validated William template's movement permissions; source timing/combat remain owned by Ishida.
+        // Flags alone do not adapt the actor's collision geometry. Native70F536/
+        // 70F571 install payload+2A/+2C through7453E0/745540 on owner+250.
+        // Ishida selects NPC collision set4; William's sword templates use the
+        // default sets (-1). Preserve William's body, retaining source attack/VFX tables.
         uint64_t player_payload=0,player_flags=0;
+        int16_t collision_set=0,secondary_collision_set=0;
         if (!copy_field(boss_adapters[slot].player_descriptor+0x20,player_payload)
-            || !copy_field(player_payload+0x18,player_flags) || player_flags!=0x8000000594C0000ULL) return false;
+            || !copy_field(player_payload+0x18,player_flags) || player_flags!=0x8000000594C0000ULL
+            || !copy_field(player_payload+0x2A,collision_set) || collision_set!=-1
+            || !copy_field(player_payload+0x2C,secondary_collision_set) || secondary_collision_set!=-1) return false;
         memcpy(payload+0x18,&player_flags,8);
+        memcpy(payload+0x2A,&collision_set,2);
+        memcpy(payload+0x2C,&secondary_collision_set,2);
     }
     if (!boss_preserve_weapon(slot,payload)) return false;
     payload[0x0B] = 4; // Native0x70F3A3: keep current+0x470, retain+0x47C=1 behavior.
