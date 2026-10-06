@@ -58,7 +58,11 @@ static void ishida_transition_cases() {
             uint64_t adapted_flags=0;memcpy(&adapted_flags,clone.payload+0x18,8);
             assert(adapted_flags==0x8000000594C0000ULL);
             assert(!memcmp(clone.payload+0x28,payloads[i]+0x28,8));
-            assert(!memcmp(clone.payload,payloads[i],8)); // Unrelated source controls remain intact.
+            assert(ishida_native_movement_mode(payloads[i])==1); // Reproduce the boss-only position policy.
+            assert(ishida_native_movement_mode(heavy_payloads[0].data())==0);
+            assert(ishida_native_movement_mode(clone.payload)==0); // Adapted entry and every phase stay player-owned.
+            uint64_t movement=0;memcpy(&movement,clone.payload,8);
+            assert(movement==0x10000000002ULL); // Only bit16 changes; the source action family remains intact.
             assert(!memcmp(clone.payload+0x40,payloads[i]+0x40,0x60));
             assert(!memcmp(clone.descriptor+0x48,descriptors[i]+0x48,0x30)); // Combat tables stay source-owned.
             int16_t onset=0,cost=0;memcpy(&onset,clone.payload+0x38,2);memcpy(&cost,clone.payload+0x16,2);
@@ -86,7 +90,9 @@ static void ishida_transition_cases() {
         }
         // Colliding action IDs and other boss signatures keep William's ordinary recoil rows.
         boss_imports[2]=source;boss_adapters[2]=player_adapter;boss_private_actions[2]={};
+        put(reinterpret_cast<void*>(source.payload),0,uint64_t(1u<<16)); // Other signatures retain their movement policy.
         assert(boss_prepare_private_action(2));unsigned recoil_rows=0;
+        assert(ishida_native_movement_mode(boss_private_actions[2].payload)==1);
         for (unsigned r=0;r<boss_private_actions[2].transition_count;++r) {
             const auto* row=boss_private_actions[2].transition_bodies[r];uint16_t condition=0;int16_t target=0;
             memcpy(&condition,row,2);memcpy(&target,row+20,2);

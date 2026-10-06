@@ -1,5 +1,7 @@
 # Reported WM issues
 
+The user still reported floating after 0.5.3. A separate header control remained unchanged: native `70EEA7` copies payload bit16 to actor `+701`; `73CF00` and `726690` turn it into movement mode1, which reaches the alternate position path at `71C61A`. William's recorded attacks use mode0. Version 0.5.4 copies only that bit from the validated William template for every private Ishida phase. Captured native instructions reproduce mode1 before adaptation and mode0 afterward without a running game. Source combat/effect data and collision commands stay intact. This establishes the native policy correction; visual grounding remains unverified.
+
 The 0.5.2 collision assumption was wrong: both recorded payloads use commands 0/1 at `+2A/+2C`. Its -1 guard rejected every real Ishida action. Version 0.5.3 removes that guard, preserves the source commands and retains private environment-hit recoil filtering. Native fixtures cover all 19 phases, repeated source keys, entry/continuation/restart and restoration. Custom/held Maria strings also receive continuation settings and configured-root restarts. Rejections now reach the GUI. The earlier ground-height and wall reports still require gameplay acceptance; offline tests do not close them.
 
 The table records alpha.7 findings. Later source-runtime observations are below it; they do not certify a packaged EXE.

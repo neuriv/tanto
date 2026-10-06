@@ -1274,6 +1274,7 @@ static void recorded_pulse_cost_cases() {
 #include "string_playback_fixture.h"
 #include "maria_cases.h"
 #include "../../runtime/native/cast_pulse_profiles.h"
+#include "ishida_movement_fixture.h"
 #include "ishida_cases.h"
 
 int main() {

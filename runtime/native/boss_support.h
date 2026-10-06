@@ -534,12 +534,15 @@ static bool boss_prepare_private_action(unsigned slot = 0) {
     if (key != expected_key || !descriptor[0x40] || source_payload != expected_payload
         || motion != expected_motion || flags != spec.flags) return false;
     if (ishida_phase(spec)) {
-        // Retain the validated player action permissions. Collision commands
-        // +2A/+2C remain source-owned: both recorded payloads use 0/1, not -1 sentinels.
-        // Requiring invented defaults here rejects every real Ishida import.
+        // Native70EEA7 copies header bit16 to actor+701;726690 then selects
+        // movement mode1 even on the ground. Use William's bit for each private
+        // phase, preserving source motion, effects and collision commands0/1.
         uint64_t player_payload=0,player_flags=0;
+        uint8_t player_movement=0;
         if (!copy_field(boss_adapters[slot].player_descriptor+0x20,player_payload)
-            || !copy_field(player_payload+0x18,player_flags) || player_flags!=0x8000000594C0000ULL) return false;
+            || !copy_field(player_payload+0x18,player_flags) || player_flags!=0x8000000594C0000ULL
+            || !copy_field(player_payload+2,player_movement)) return false;
+        payload[2]=uint8_t((payload[2]&~1u)|(player_movement&1u));
         memcpy(payload+0x18,&player_flags,8);
     }
     if (!boss_preserve_weapon(slot,payload)) return false;

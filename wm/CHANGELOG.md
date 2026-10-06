@@ -1,5 +1,12 @@
 # Release notes
 
+## 0.5.4
+
+- Adapt Ishida's movement header bit16 to William's corresponding bit on every private string phase. The native setter previously retained Ishida's mode1 position policy even on the ground. Source motion, action-family flags, combat tables, effects and collision commands remain unchanged; other characters keep their original movement policy.
+- Reproduce the mode mismatch by executing captured native setter/query instructions in a disposable offline fixture. Verify all 19 configured Ishida phases on both continuation button families, alongside the existing entry/restart/exit checks.
+
+The offline native regression passes. Visual grounding and wall behavior still need gameplay acceptance; no in-game testing was performed.
+
 ## 0.5.3
 
 - Remove the invalid collision-command check introduced in 0.5.2. Real Ishida and William payloads use 0/1; requiring -1 rejected Ishida imports and left basic attacks in their place. Preserve the original collision commands and Ishida's private wall-recoil filtering.
