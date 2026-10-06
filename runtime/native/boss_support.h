@@ -132,23 +132,22 @@ static int boss_string_successor(unsigned slot) {
     return ishida_phase(move) && move.next_variant>=0 ? int(boss_imports[move.next_variant].key) : sword_string_successor(move);
 }
 static int boss_string_restart(unsigned slot) {
-    // A terminal phase returns only to its configured attack root in this stance/bank.
-    // Walk the authored forward graph so shared terminal phases cannot pick an unrelated root.
+    // Input family is compiled for every entry kind, including chords and holds.
+    // Walk only configured roots in this stance/bank; shared endings cannot select
+    // an unrelated or ambiguous root merely because their action keys match.
     const auto& owner=boss_adapters[slot];const unsigned family=boss_settings(slot).input_family;
     if (owner.kind!=4 || (family!=1 && family!=2) || boss_string_successor(slot)!=0) return -1;
-    const unsigned stance=owner.player_key==0xCF5 ? 1u : owner.player_key==0xC7A ? 2u : owner.player_key==0xCB7 ? 4u : 0u;
     int root=-1;
-    for (const auto& binding : boss_skill_bindings) {
-        if (!binding.variant || binding.variant>boss_import_count || !(binding.stances&stance)
-            || (family==1 ? binding.kind!=5 : binding.kind!=1 || binding.key!=owner.player_key)) continue;
-        unsigned current=binding.variant-1;
+    for (unsigned entry=0;entry<boss_import_count;++entry) {
+        if (boss_settings(entry).input_family!=family) continue;
+        unsigned current=entry;
         if (boss_adapters[current].kind!=2 || boss_string_successor(current)<=0) continue;
         for (unsigned depth=0;depth<boss_import_count;++depth) {
             const auto& candidate=boss_adapters[current];
             if (candidate.bank!=owner.bank || candidate.player_key!=owner.player_key) break;
             if (current==slot) {
-                if (root>=0 && root!=int(binding.variant-1)) return -1;
-                root=int(binding.variant-1);break;
+                if (root>=0 && root!=int(entry)) return -1;
+                root=int(entry);break;
             }
             if (ishida_phase(boss_imports[current])) {
                 const int next=boss_imports[current].next_variant;
@@ -535,19 +534,13 @@ static bool boss_prepare_private_action(unsigned slot = 0) {
     if (key != expected_key || !descriptor[0x40] || source_payload != expected_payload
         || motion != expected_motion || flags != spec.flags) return false;
     if (ishida_phase(spec)) {
-        // Flags alone do not adapt the actor's collision geometry. Native70F536/
-        // 70F571 install payload+2A/+2C through7453E0/745540 on owner+250.
-        // Ishida selects NPC collision set4; William's sword templates use the
-        // default sets (-1). Preserve William's body, retaining source attack/VFX tables.
+        // Retain the validated player action permissions. Collision commands
+        // +2A/+2C remain source-owned: both recorded payloads use 0/1, not -1 sentinels.
+        // Requiring invented defaults here rejects every real Ishida import.
         uint64_t player_payload=0,player_flags=0;
-        int16_t collision_set=0,secondary_collision_set=0;
         if (!copy_field(boss_adapters[slot].player_descriptor+0x20,player_payload)
-            || !copy_field(player_payload+0x18,player_flags) || player_flags!=0x8000000594C0000ULL
-            || !copy_field(player_payload+0x2A,collision_set) || collision_set!=-1
-            || !copy_field(player_payload+0x2C,secondary_collision_set) || secondary_collision_set!=-1) return false;
+            || !copy_field(player_payload+0x18,player_flags) || player_flags!=0x8000000594C0000ULL) return false;
         memcpy(payload+0x18,&player_flags,8);
-        memcpy(payload+0x2A,&collision_set,2);
-        memcpy(payload+0x2C,&secondary_collision_set,2);
     }
     if (!boss_preserve_weapon(slot,payload)) return false;
     payload[0x0B] = 4; // Native0x70F3A3: keep current+0x470, retain+0x47C=1 behavior.

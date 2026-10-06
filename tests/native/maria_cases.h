@@ -22,6 +22,7 @@ static void maria_transition_cases() {
         put(heavy_descriptors[0].data(),0x82,player_adapter.transition_count);
         put(heavy_payloads[0].data(),0x20,player_adapter.player_motion);
         put(heavy_payloads[0].data(),0x24,player_adapter.recovery_frame);
+        put(heavy_payloads[0].data(),0x18,uint64_t(0x8000000594C0000ULL));
         for (auto& row : player_rows[0]) {
             int16_t target=0;memcpy(&target,row.data()+0x14,2);
             if (target!=0xCF6) continue;
@@ -50,6 +51,11 @@ static void maria_transition_cases() {
         for (unsigned i=0;i<9;++i) {
             const auto& phase=phases[i];uint8_t before[0xB0];memcpy(before,payloads[i],sizeof(before));
             const unsigned root=i<3 ? 0 : i<5 ? 3 : i<7 ? 5 : i;
+            // Match real compilation: only the selected graph gets its input family.
+            for (unsigned j=0;j<9;++j) boss_move_settings[j+2].input_family=0;
+            for (unsigned j=root;j<9 && (j==root || phases[j].kind==4);++j)
+                boss_move_settings[j+2]={1,40,30,36,uint16_t(family)};
+            boss_private_actions[i+2]={};
             boss_skill_bindings[0]={i==7 ? 6u : family==1 ? 5u : 1u,1u<<(2-stance),root+3,
                 player_adapter.player_key,player_adapter.player_motion,player_adapter.transition_count,0x8000000594C0000ULL};
             if (i==2) assert(boss_native_successor(i+2,0xC83)==-1); // Maria C82 is not Jin's airborne C82.
@@ -81,14 +87,23 @@ static void maria_transition_cases() {
                     int16_t start=0;memcpy(&start,row+0x20,2);assert(start==126);
                 }
             }
+            if (next_rows!=(next ? 2u : 0u)) std::fprintf(stderr,"Maria key=%X stance=%u family=%u next=%X rows=%u restart=%d\n",
+                phase.key,stance,family,next,next_rows,boss_string_restart(i+2));
             assert(next_rows==(next ? 2u : 0u));
             int16_t onset=0,cost=0;memcpy(&onset,clone.payload+0x38,2);memcpy(&cost,clone.payload+0x16,2);
             assert(onset==phase.adapted && cost==10 && !memcmp(before,payloads[i],sizeof(before)));
             auto collision=boss_imports[i+2];collision.motion+=1;
             assert(!recorded_grounded(collision,boss_adapters[i+2]) && sword_string_successor(collision)==-1);
-            boss_move_settings[i+2]={};
+            if (i==2 || i==4 || i==6) {
+                unsigned slots[3]{};const unsigned count=i-root+1;
+                for (unsigned j=0;j<count;++j) slots[j]=root+j+2;
+                native_string_playback(slots,count,stance,family,family==2);
+            }
         }
         // Shared C82 must restart the selected dash root, never the earlier C80 import.
+        for (unsigned j=0;j<9;++j) boss_move_settings[j+2].input_family=0;
+        boss_move_settings[10]={1,40,30,36,uint16_t(family)};
+        boss_move_settings[3]={1,40,30,36,uint16_t(family)};
         boss_move_settings[4]={1,40,30,36,uint16_t(family)};
         boss_skill_bindings[0].variant=11;
         assert(boss_string_restart(4)==10 && boss_native_successor(4,0xC8A)==10);
@@ -100,15 +115,17 @@ static void maria_transition_cases() {
             if (target==0xC8A) {++restarts;assert(row[0x0B]==(family==1 ? 0 : 1) && row[0x0C]==1);}
         }
         assert(restarts==2);
-        const auto binding=boss_skill_bindings[0];
-        boss_skill_bindings[0].stances^=7;assert(boss_string_restart(4)==-1);boss_skill_bindings[0]=binding;
-        boss_skill_bindings[0].kind=6;assert(boss_string_restart(4)==-1);boss_skill_bindings[0]=binding;
-        boss_skill_bindings[0].kind=family==1 ? 1 : 5;assert(boss_string_restart(4)==-1);boss_skill_bindings[0]=binding;
+        const unsigned dash_slots[]={10,3,4};
+        native_string_playback(dash_slots,3,stance,family,family==2);
+        // Chord, held and dodge entries have no ordinary Quick/Strong binding.
+        for (auto& binding : boss_skill_bindings) binding={};
+        assert(boss_string_restart(4)==10 && boss_native_successor(4,0xC8A)==10);
+        boss_move_settings[10].input_family=0;assert(boss_string_restart(4)==-1);
+        boss_move_settings[10].input_family=uint16_t(family);
         boss_adapters[10].bank+=8;assert(boss_string_restart(4)==-1);boss_adapters[10].bank-=8;
         boss_adapters[3].bank+=8;assert(boss_string_restart(4)==-1);boss_adapters[3].bank-=8;
-        boss_skill_bindings[1]=binding;boss_skill_bindings[1].variant=3;
-        assert(boss_string_restart(4)==-1);boss_skill_bindings[1]={};
-        boss_skill_bindings[0].variant=3;assert(boss_string_restart(4)==2);
+        boss_move_settings[2].input_family=uint16_t(family);assert(boss_string_restart(4)==-1);
+        boss_move_settings[10].input_family=0;assert(boss_string_restart(4)==2);
         boss_move_settings[4]={};
     }
 }

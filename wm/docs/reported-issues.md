@@ -1,6 +1,6 @@
 # Reported WM issues
 
-The 0.5.2 Ishida patch replaces the NPC collision presets at payload `+2A/+2C` with William's validated defaults and disables the two environment-hit recoil exits in private player transitions. The earlier flags-only adaptation did not address the reported lift. Native fixtures reproduce both omissions in released code and cover all 19 phases with both attack buttons. Source combat/effect tables and other moves' recoil remain intact. Ground height and wall behavior still need gameplay acceptance; offline checks do not close those reports.
+The 0.5.2 collision assumption was wrong: both recorded payloads use commands 0/1 at `+2A/+2C`. Its -1 guard rejected every real Ishida action. Version 0.5.3 removes that guard, preserves the source commands and retains private environment-hit recoil filtering. Native fixtures cover all 19 phases, repeated source keys, entry/continuation/restart and restoration. Custom/held Maria strings also receive continuation settings and configured-root restarts. Rejections now reach the GUI. The earlier ground-height and wall reports still require gameplay acceptance; offline tests do not close them.
 
 The table records alpha.7 findings. Later source-runtime observations are below it; they do not certify a packaged EXE.
 

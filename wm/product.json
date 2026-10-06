@@ -2,7 +2,7 @@
   "schema_version": 1,
   "kind": "sword",
   "name": "Tanto",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "desktop": "electron",
   "worker_name": "WMWorker"
 }

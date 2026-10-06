@@ -295,6 +295,7 @@ static void replacement_reset() {
     // Use recorded William transition bytes and the source recovery/count signatures.
     // Distinct banks reveal accidental reuse of Okatsu resources during replacement or exit.
     for (auto& adapter : boss_adapters) adapter={};
+    for (auto& settings : boss_move_settings) settings={};
     reset();for (auto& binding : boss_skill_bindings) binding={};for (auto& chord : boss_chord_reservations) chord={};
     boss_chord_reservation_count=0;boss_active_slot=0; pending_heavy={}; boss_hold_variant=0; boss_hold_milliseconds=0;
     game_input_state=replacement_input; pad_mask=1; pad_buttons=0; native_idle_fallbacks=0; publish_during_input=false;
@@ -1270,6 +1271,7 @@ static void recorded_pulse_cost_cases() {
     }
 }
 
+#include "string_playback_fixture.h"
 #include "maria_cases.h"
 #include "../../runtime/native/cast_pulse_profiles.h"
 #include "ishida_cases.h"

@@ -99,7 +99,8 @@ def supervise(args):
                     if (trace/'ready.json').exists():
                         live = read_json(trace/'live.json', {})
                         status(live.get('state', 'enabled'), pid=boss['session']['pid'], trace=str(trace),
-                               binding=read_json(HERE/'controller-binding.json', {}).get('name', 'Sword preset'))
+                               binding=read_json(HERE/'controller-binding.json', {}).get('name', 'Sword preset'),
+                               detail=live.get('detail', ''))
                     time.sleep(.25)
             except BaseException:
                 # The worker owns native restoration. Keep this supervisor and

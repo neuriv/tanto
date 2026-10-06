@@ -352,9 +352,12 @@ def compiled_move_settings(configuration, imports, policy=None):
             {**{chain[0]:chain for chain in manifest['candidates'].values()},**manifest['hold_chains']}.items()}
     present={move['id'] for move in imports}
     inherited={child:root for root,chain in chains.items() if root in present for child in chain}
-    families={binding['move']:1 if binding['source']=='light_attack' else 2
-              for binding in configuration['skill_bindings'] if 'input' not in binding
-              and binding['source'] in ('light_attack','heavy_attack') and binding['move'] in STRING_MOVES}
+    # Chords and held entries continue on Triangle; ordinary Quick overrides to Square.
+    # Every phase needs this setting so native recovery can restart its selected string.
+    families={root:2 for root in present & STRING_MOVES}
+    families.update({binding['move']:1 if binding['source']=='light_attack' else 2
+                     for binding in configuration['skill_bindings'] if 'input' not in binding
+                     and binding['source'] in ('light_attack','heavy_attack') and binding['move'] in STRING_MOVES})
     if configuration['low_heavy']: families[configuration['low_heavy']]=2
     result=[]
     for move in imports:

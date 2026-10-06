@@ -1,10 +1,19 @@
 # Release notes
 
+## 0.5.3
+
+- Remove the invalid collision-command check introduced in 0.5.2. Real Ishida and William payloads use 0/1; requiring -1 rejected Ishida imports and left basic attacks in their place. Preserve the original collision commands and Ishida's private wall-recoil filtering.
+- Give custom, held and tap strings a consistent Triangle/Y continuation family. Ordinary Quick strings keep Square/X. Restart the configured graph after completion, including Maria's shared endings and Ishida's repeated source keys.
+- Show native move-rejection details in the GUI instead of silently reporting an enabled mod. Ordinary basic attacks no longer clear this warning; a successful replacement or cast cancel does.
+- Replace invented fixture values with recorded fields and shared source descriptors. Exercise cold native entry, every continuation, two restart cycles, exit/restoration, all nine Maria/Ishida strings across five entry types, and warning propagation to the editor.
+
+This release uses offline tests and isolated packaged checks only. In-game acceptance, including the earlier Ishida lift/wall reports, remains unverified.
+
 ## 0.5.2
 
-- Adapt all 19 Ishida sword phases to William's default collision presets. The previous flags-only adaptation still installed Ishida's NPC collision set 4 on William.
+- Introduced an incorrect collision-preset assumption and guard, which rejected real Ishida actions. The claimed set 4/-1 values were wrong; 0.5.3 removes the guard.
 - Disable Ishida's private environment-hit recoil exits. Preserve other moves' recoil, enemy guard deflection, damage/death exits, source combat tables, timed effects and animation timing.
-- Reproduce the released collision-preset and wall-recoil omissions in native fixtures; cover both attack buttons, all five strings, unchanged source data and rejection of incompatible player collision presets.
+- Added collision and recoil fixtures. Their invented collision values missed the real-data rejection; 0.5.3 corrects the fixtures and exercises actual native dispatch.
 
 Offline native and packaged checks do not confirm the reported lift or wall behavior in gameplay. The user requested offline work; in-game acceptance remains pending.
 

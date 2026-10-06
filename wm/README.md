@@ -16,6 +16,10 @@ Open Nioh, enter a mission with a single katana, then open Tanto. New installs s
 
 PlayStation and Xbox labels describe the same logical buttons. Frost Moon requires a Ki Pulse window: hold R1/RB and tap the destination stance button twice.
 
+Quick Attack strings continue with Square/X. Strings entered through a custom chord, tap or held binding continue with Triangle/Y. Press again after completion to restart the selected string. Each strike still needs its own press.
+
+If the engine rejects a configured move, the editor shows a rejection message with the session log holding the details. The warning clears after a successful replacement or cast cancel.
+
 | Input | Move |
 | --- | --- |
 | Low heavy / dodge-heavy | Jin's three-hit string / second cyclone slash |

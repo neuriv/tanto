@@ -94,6 +94,15 @@ class OwnedGame:
 
 
 class BossTests(unittest.TestCase):
+    def test_move_rejection_survives_basic_calls_until_a_real_dispatch_succeeds(self):
+        detail = dispatch.move_rejection_detail(dict(dispatch_reason=24, native_result=1), '')
+        self.assertIn('rejected', detail)
+        for record in (dict(dispatch_reason=20, native_result=1),
+                       dict(dispatch_reason=20, native_result=0, final_exact_match=True)):
+            self.assertEqual(dispatch.move_rejection_detail(record, detail), detail)
+        for flag in ('final_exact_match', 'native_cast_pulse'):
+            self.assertEqual(dispatch.move_rejection_detail(dict(dispatch_reason=20, native_result=1, **{flag:True}), detail), '')
+
     def test_source_descriptor_player_identity_and_profile_binding(self):
         # Reject mismatched source descriptors, player identities and profile bindings.
         # Validate the configured player and source descriptor using owned resource memory.

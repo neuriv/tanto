@@ -10,6 +10,36 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class SwordConfigurationTests(unittest.TestCase):
+    def test_string_input_family_survives_every_entry_kind(self):
+        from copy import deepcopy
+        from prepare_session import compiled_move_settings
+        baseline = json.loads((ROOT/'data/presets/sword-maria.json').read_text())
+        baseline['skill_bindings'] = []
+        baseline['move_settings'] = {}
+        for manifest in config.SOURCE_MANIFESTS:
+            if manifest['boss_id'] not in ('maria', 'ishida_mitsunari'):
+                continue
+            for root, chain in manifest['hold_chains'].items():
+                if root not in config.STRING_MOVES or len(chain) < 2:
+                    continue
+                for entry in ('custom', 'held', 'tap', 'quick', 'heavy'):
+                    with self.subTest(move=root, entry=entry):
+                        preset = deepcopy(baseline)
+                        if entry == 'held': preset['stance_holds']['low'] = root
+                        elif entry == 'tap': preset.update(tap_move=root, chord_stance='low')
+                        else:
+                            binding = dict(source='light_attack' if entry=='quick' else 'heavy_attack', stance='low', move=root)
+                            if entry == 'custom':
+                                binding['input'] = dict(modifier_mask=16, trigger_mask=4, gesture='tap')
+                            preset['skill_bindings'] = [binding]
+                        fixture = sessions.RuntimeSessionTests(); fixture.setUp()
+                        fixture.configured_fixture(preset)
+                        settings = dict(zip((move['id'] for move in fixture.config['imports']),
+                                            compiled_move_settings(preset, fixture.config['imports'])))
+                        self.assertTrue(all(settings[phase].get('input_family', 0)==(1 if entry=='quick' else 2)
+                                            for phase in chain))
+                        encode_session(fixture.config, fixture.pid, fixture.born)
+
     def test_okatsu_string_opener_can_use_a_regular_chord(self):
         from prepare_session import configured_imports
         preset = json.loads((ROOT/'data/preset.json').read_text(encoding='utf8'))

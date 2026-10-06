@@ -29,6 +29,17 @@ COMMAND = struct.Struct('<qqqq10QIiII3Qq')
 assert CONTROL.size == 64 and COMMAND.size == 160
 
 
+def move_rejection_detail(record, previous):
+    # DesiredMissing/Mismatch and BossSource/BindingMismatch in dispatch_protocol.h.
+    # Ordinary native calls must not erase a rejected import; only a successful
+    # configured move or cast cancel establishes that dispatch is working again.
+    if record['dispatch_reason'] in (18, 19, 24, 25):
+        return 'A configured move was rejected. Details are in the session log.'
+    if record['native_result']==1 and (record.get('final_exact_match') or record.get('native_cast_pulse')):
+        return ''
+    return previous
+
+
 class CommandMap:
     def __init__(self, pid, tag):
         # Open the command mapping named for a process and configuration.
@@ -330,6 +341,7 @@ def main():
             last_resource_state = None
             last_gesture = 0
             last_feedback = None
+            rejection_detail = ''
             next_telemetry = started
             next_resources = started
             live_input = {}
@@ -440,6 +452,7 @@ def main():
                             record['substitution_intended'] = bool(record['valid_fields'] & (1 << 16))
                             record['final_exact_match'] = bool(record['valid_fields'] & (1 << 17))
                             record['native_cast_pulse'] = bool(record['valid_fields'] & (1 << 19))
+                            rejection_detail = move_rejection_detail(record, rejection_detail)
                             if record['substitution_intended']:
                                 record['action_name'] = ' / '.join(move['name'] for move in boss['imports'] if move['key']==record['forwarded_key']) or None
                             if (record['final_exact_match'] or record['native_cast_pulse']) and record['valid_fields'] & (1 << 18):
@@ -469,7 +482,7 @@ def main():
                             controller=controller.detection, buttons=last_input_event['button_labels'] if last_input_event and intent.connected else [],
                             input_transport='game_xinput',
                             dispatch_count=control['dispatch_count'], native_control=control,
-                            resources=last_resource_state, updated_at=time.time()))
+                            resources=last_resource_state, detail=rejection_detail, updated_at=time.time()))
                         next_telemetry = now + int(.1 * frequency)
                     output.flush()
                     time.sleep(.002)

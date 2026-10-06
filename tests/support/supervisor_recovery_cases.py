@@ -25,7 +25,7 @@ class Recovery(unittest.TestCase):
             writes = []
             atomic = play.atomic_json
             def publish(path, value):
-                if path.name == 'play-status.json': writes.append(value['state'])
+                if path.name == 'play-status.json': writes.append(value)
                 atomic(path, value)
             def prepare(command, **kwargs):
                 (runtime/'boss-session.json').write_text(json.dumps(dict(config_tag='0123456789abcdef', session=dict(pid=123))))
@@ -33,6 +33,7 @@ class Recovery(unittest.TestCase):
             def launch(command, **kwargs):
                 trace = Path(command[command.index('--outdir')+1]); trace.mkdir()
                 (trace/'ready.json').write_text('{}')
+                (trace/'live.json').write_text(json.dumps(dict(state='enabled', detail='A configured move was rejected.')))
                 (trace/'status.json').write_text(json.dumps(dict(start_attempted=False, stop_completed=False)))
                 polls = iter((None, None, None, 0))
                 def poll():
@@ -44,7 +45,9 @@ class Recovery(unittest.TestCase):
                  patch.object(play.subprocess, 'run', side_effect=prepare), patch.object(play.subprocess, 'Popen', side_effect=launch), \
                  patch.object(play, 'process_identity', return_value=dict(publisher_pid=12)), contextlib.redirect_stdout(io.StringIO()):
                 self.assertEqual(play.supervise(argparse.Namespace(dll=dll)), 0)
-            self.assertEqual(writes.count('enabled'), 1)
+            enabled = [value for value in writes if value['state']=='enabled']
+            self.assertEqual(len(enabled), 1)
+            self.assertEqual(enabled[0]['detail'], 'A configured move was rejected.')
 
     def test_native_resource_failure_stops_activation_without_retry(self):
         # A pending native load may still own callbacks even after its frame hook detaches.
